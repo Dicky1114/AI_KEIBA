@@ -1,0 +1,281 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- ヒーローセクション -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="container">
+            <h1 class="hero-title fade-in-up">
+                <i class="fas fa-horse-head"></i>
+                競馬予測システム
+            </h1>
+            <p class="hero-subtitle fade-in-up">AIを活用した次世代の競馬予測プラットフォーム</p>
+            <div class="mt-4 fade-in-up">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-rocket"></i> 今すぐ始める
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> ログイン
+                </a>
+                {% else %}
+                <a href="{% url 'core:dashboard' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-tachometer-alt"></i> ダッシュボードへ
+                </a>
+                <a href="#features" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-info-circle"></i> 詳しく見る
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 統計セクション -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stats-number">89.2%</div>
+                    <div class="stats-label">AI予測的中率</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-flag-checkered"></i>
+                    </div>
+                    <div class="stats-number">12,450</div>
+                    <div class="stats-label">分析済みレース数</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-horse"></i>
+                    </div>
+                    <div class="stats-number">8,976</div>
+                    <div class="stats-label">データベース馬数</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-number">2,341</div>
+                    <div class="stats-label">利用ユーザー数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 機能紹介セクション -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="mb-3">
+                    <i class="fas fa-star"></i>
+                    主な機能
+                </h2>
+                <p class="lead">最新のAI技術を活用した高精度な競馬予測システム</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-brain text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">AI予測エンジン</h5>
+                        <p class="card-text">機械学習アルゴリズムを使用して、過去のデータから最適な予測を提供します。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-bar text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">詳細分析</h5>
+                        <p class="card-text">馬の過去成績、騎手情報、コース適性など多角的な分析を提供します。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-mobile-alt text-info" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">リアルタイム更新</h5>
+                        <p class="card-text">最新のレース情報とオッズ変動をリアルタイムで反映します。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-history text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">履歴管理</h5>
+                        <p class="card-text">予測結果と実際の結果を比較し、継続的にシステムを改善します。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-bell text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">通知機能</h5>
+                        <p class="card-text">重要なレースや予測結果をタイムリーに通知します。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-shield-alt text-secondary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">セキュリティ</h5>
+                        <p class="card-text">最高水準のセキュリティでユーザーの個人情報を保護します。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 今日のレースセクション -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-calendar-day"></i>
+                    今日の注目レース
+                </h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star text-warning"></i>
+                            第68回 有馬記念 (G1)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>開催場：</strong>中山競馬場</p>
+                                <p><strong>距離：</strong>芝2500m</p>
+                                <p><strong>発走時刻：</strong>15:25</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>出走頭数：</strong>16頭</p>
+                                <p><strong>賞金：</strong>3億円</p>
+                                <p><strong>AI予測：</strong>
+                                    <span class="badge badge-primary">高信頼度</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            {% if user.is_authenticated %}
+                            <a href="#" class="btn btn-primary">
+                                <i class="fas fa-eye"></i> 予測を見る
+                            </a>
+                            {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> ログインして予測を見る
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTAセクション -->
+{% if not user.is_authenticated %}
+<section class="py-5" style="background: var(--gradient-primary); color: white;">
+    <div class="container text-center">
+        <h2 class="mb-3">今すぐ始めてみませんか？</h2>
+        <p class="lead mb-4">無料でアカウント作成して、AI競馬予測を体験してください。</p>
+        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
+            <i class="fas fa-user-plus"></i> 無料で始める
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 統計アニメーション
+document.addEventListener('DOMContentLoaded', function() {
+    // カウントアップアニメーション
+    const stats = document.querySelectorAll('.stats-number');
+    
+    const animateStats = () => {
+        stats.forEach(stat => {
+            const target = parseInt(stat.textContent.replace(/[^\d]/g, ''));
+            const increment = target / 50;
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (stat.textContent.includes('%')) {
+                    stat.textContent = current.toFixed(1) + '%';
+                } else {
+                    stat.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 30);
+        });
+    };
+    
+    // Intersection Observer for animation trigger
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStats();
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+    
+    const statsSection = document.querySelector('.stats-card').parentElement.parentElement;
+    observer.observe(statsSection);
+});
+</script>
+{% endblock %}

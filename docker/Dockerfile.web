@@ -1,0 +1,50 @@
+FROM python:3.13-slim
+
+# 環境変数
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# システムパッケージのインストール
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    libpq-dev \
+    wget \
+    gnupg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Chrome/Chromedriver のインストール（Selenium用）
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# Pythonの依存関係をインストール
+COPY requirements/base.txt requirements/production.txt ./
+RUN pip install --no-cache-dir -r production.txt
+
+# アプリケーションコードをコピー
+COPY . .
+
+# 静的ファイルの収集
+RUN python manage.py collectstatic --noinput --settings=config.settings.production
+
+# 非rootユーザーの作成
+RUN useradd --create-home --shell /bin/bash keiba
+RUN chown -R keiba:keiba /app
+USER keiba
+
+# ポートの公開
+EXPOSE 8000
+
+# ヘルスチェック
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health/ || exit 1
+
+# アプリケーションの起動
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]

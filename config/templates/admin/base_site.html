@@ -1,0 +1,233 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | 競馬予測システム{% endblock %}
+
+{% block branding %}
+<div class="premium-header">
+    <div class="header-container">
+        <div class="brand-section">
+            <a href="{% url 'admin:index' %}" class="brand-link">
+                <div class="brand-icon-wrapper">
+                    <div class="brand-icon">
+                        <i class="fas fa-horse-head"></i>
+                    </div>
+                    <div class="icon-glow"></div>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-title">KEIBA PREDICTION</h1>
+                    <span class="brand-subtitle">Advanced Management System</span>
+                </div>
+            </a>
+        </div>
+        <div class="header-controls">
+            <button class="hamburger-menu" id="hamburgerMenu" title="メニュー">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="user-role">管理者</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="/" class="action-btn" title="フロントサイトへ">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <a href="{% url 'admin:logout' %}" class="action-btn logout" title="ログアウト">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div class="mobile-overlay-backdrop" id="mobileOverlayBackdrop"></div>
+
+<nav class="premium-sidebar" id="premiumSidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-brand">
+            <i class="fas fa-horse-head"></i>
+            <span class="brand-text">KEIBA</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" title="サイドバー切り替え">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="nav-group">
+            <div class="nav-group-title">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>ダッシュボード</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'admin:index' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <span class="nav-text">ホーム</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">
+                <i class="fas fa-database"></i>
+                <span>データ管理</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'admin:races_race_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-flag-checkered"></i>
+                        </div>
+                        <span class="nav-text">レース管理</span>
+                        <div class="nav-badge">1,247</div>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:races_venue_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span class="nav-text">競馬場</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:horses_horse_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-horse"></i>
+                        </div>
+                        <span class="nav-text">馬情報</span>
+                        <div class="nav-badge">8,934</div>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:horses_jockey_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <span class="nav-text">騎手情報</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">
+                <i class="fas fa-brain"></i>
+                <span>AI・予測</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'admin:predictions_prediction_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <span class="nav-text">予測結果</span>
+                        <div class="nav-status active"></div>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:predictions_predictionmodel_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <span class="nav-text">予測モデル</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">
+                <i class="fas fa-tools"></i>
+                <span>システム管理</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'admin:scraping_scrapingjob_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <span class="nav-text">データ収集</span>
+                        <div class="nav-status warning"></div>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:accounts_customuser_changelist' %}" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="nav-text">ユーザー管理</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <div class="status-item">
+                    <div class="status-indicator pulse active"></div>
+                    <span>システム正常稼働中</span>
+                </div>
+                <div class="system-info">
+                    <small>Version 2.1.0 • Uptime: 7d 12h</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block footer %}
+<div class="premium-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-horse-head"></i>
+                <span>KEIBA PREDICTION SYSTEM</span>
+            </div>
+            <div class="footer-info">
+                <span>© 2024 Advanced AI Racing Prediction Platform</span>
+                <div class="footer-links">
+                    <a href="/">フロントサイト</a>
+                    <span>•</span>
+                    <span>管理画面 v2.1.0</span>
+                    <span>•</span>
+                    <span>Django {{ django_version }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}
