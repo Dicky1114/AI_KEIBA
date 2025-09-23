@@ -333,3 +333,4 @@ docker-compose -f docker-compose.yml --profile production up -d
 ---
 
 **注意**: このシステムは教育・研究目的で開発されています。実際の賭博行為は法律で禁止されている場合がありますので、各地域の法律に従ってご利用ください。
+# KEIBA
