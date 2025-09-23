@@ -75,39 +75,84 @@ KEIBA/
 - **Nginx** - Webサーバー（本番環境）
 - **Gunicorn** - WSGIサーバー
 
-## セットアップ
+## 🚀 クイックスタート
+
+### 方法1: Docker（推奨・最も簡単）
+
+**必要なもの**: Docker Desktop + Git
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/Dicky1114/KEIBA.git
+cd KEIBA
+
+# 2. Dockerで起動（これだけ！）
+docker-compose up -d
+```
+
+**アクセス**:
+- 管理画面: http://localhost:8000/admin/
+- API: http://localhost:8000/api/v1/
+- フロント画面: http://localhost:8000/
+
+### 方法2: Python環境
+
+**必要なもの**: Python 3.13+ + PostgreSQL 15+ + Redis 7+ + Git
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/Dicky1114/KEIBA.git
+cd KEIBA
+
+# 2. 仮想環境作成
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate  # Windows
+
+# 3. 依存関係インストール
+pip install -r requirements/development.txt
+
+# 4. 環境変数設定
+cp .env.example .env
+# .envファイルを編集（必要に応じて）
+
+# 5. データベース設定
+createdb keiba_db
+python manage.py migrate
+python manage.py createsuperuser
+
+# 6. サーバー起動
+python manage.py runserver
+```
+
+## 📋 詳細セットアップ
 
 ### 前提条件
+
+#### Docker使用の場合
+- Docker Desktop
+- Git
+
+#### Python環境使用の場合
 - Python 3.13+
 - PostgreSQL 15+
 - Redis 7+
 - Git
 
-### 1. リポジトリのクローン
-```bash
-git clone <repository-url>
-cd KEIBA
-```
+### 環境変数の設定
 
-### 2. 仮想環境の作成
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
-```
+初回起動時に環境変数を設定する必要があります：
 
-### 3. 依存関係のインストール
 ```bash
-pip install -r requirements/development.txt
-```
-
-### 4. 環境変数の設定
-```bash
+# .envファイルを作成
 cp .env.example .env
-# .envファイルを編集して必要な設定を追加
+
+# .envファイルを編集（必要に応じて）
+# データベース設定、APIキーなどを設定
 ```
 
-### 5. データベースの設定
+### データベースの設定
+
 ```bash
 # PostgreSQL データベース作成
 createdb keiba_db
@@ -120,12 +165,7 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 6. 開発サーバー起動
-```bash
-python manage.py runserver
-```
-
-## Docker での起動
+## 🐳 Docker での起動
 
 ### 開発環境
 ```bash
@@ -136,6 +176,35 @@ docker-compose up -d
 ```bash
 docker-compose -f docker-compose.yml --profile production up -d
 ```
+
+### 停止
+```bash
+docker-compose down
+```
+
+## 🔄 別のパソコンでの使用
+
+1. **リポジトリをクローン**
+   ```bash
+   git clone https://github.com/Dicky1114/KEIBA.git
+   cd KEIBA
+   ```
+
+2. **Dockerで起動（推奨）**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **またはPython環境で起動**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements/development.txt
+   python manage.py migrate
+   python manage.py runserver
+   ```
+
+**これだけで完全に動作する環境が構築できます！** 🎉
 
 ## API エンドポイント
 
