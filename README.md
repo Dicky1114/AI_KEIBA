@@ -1,405 +1,121 @@
-# 競馬予測システム (KEIBA)
+# AI_KEIBA - 競馬予測アプリケーション
 
-## 概要
+Django製の競馬予測アプリケーション。Supabase PostgreSQLデータベースとRender.comでホスティング。
 
-競馬予測システムは、機械学習とデータ分析を活用した競馬の予測プラットフォームです。レースデータの収集から予測、結果分析まで一連の機能を提供します。
+## 機能
 
-## 🎨 管理画面カスタマイズ
-
-最新のアップデートで、Django管理画面をモダンなUI/UXデザインにカスタマイズしました：
-
-- **🎯 レスポンシブデザイン**: デスクトップ、タブレット、モバイルに対応
-- **🎨 ダークテーマ**: 目に優しいダークカラーパレット
-- **📱 ハンバーガーメニュー**: サイドバーの表示/非表示制御
-- **⚡ 高速レスポンス**: 最適化されたCSS/JavaScript
-- **🔧 コンポーネント分離**: 保守性の高いコード構成
-
-詳細は [管理画面設計書](docs/admin_design_specification.md) をご覧ください。
-
-## 特徴
-
-- 🏁 **包括的なデータ管理**: レース、馬、騎手、競馬場の詳細データ管理
-- 🤖 **機械学習予測**: 複数のアルゴリズムによる予測モデル
-- 📊 **高度な分析機能**: データ可視化と統計分析
-- 🔄 **自動データ収集**: Webスクレイピングによる自動データ更新
-- 📱 **REST API**: モバイルアプリや外部サービス連携
-- 🔔 **通知システム**: 重要なイベントの通知機能
-- 🐳 **Docker対応**: 簡単なデプロイメント環境
-
-## システム構成
-
-```
-KEIBA/
-├── apps/                    # アプリケーション群
-│   ├── core/               # コア機能（共通ベースクラス、ユーティリティ）
-│   ├── accounts/           # ユーザー管理・認証
-│   ├── races/              # レース管理
-│   ├── horses/             # 馬・騎手管理
-│   ├── predictions/        # 予測システム
-│   ├── scraping/          # データ収集
-│   ├── analytics/         # データ分析・可視化
-│   └── notifications/     # 通知システム
-├── config/                 # Django設定
-├── ml_models/             # 機械学習モデル格納
-├── tests/                 # テスト
-├── docker/               # Docker設定
-└── docs/                 # ドキュメント
-```
+- 競馬データのスクレイピング
+- データ分析とレース予測
+- 管理画面でのデータ管理
+- Celeryによるバックグラウンドタスク処理
 
 ## 技術スタック
 
-### Backend
-- **Django 5.1.4** - Webフレームワーク
-- **Django REST Framework** - API開発
-- **PostgreSQL** - メインデータベース
-- **Redis** - キャッシュ・セッション・タスクキュー
-- **Celery** - 非同期タスク処理
+- **Backend**: Django 5.1.4
+- **Database**: PostgreSQL (Supabase)
+- **Cache/Queue**: Redis
+- **Task Queue**: Celery
+- **Deployment**: Render.com
+- **Web Scraping**: Selenium, BeautifulSoup
 
-### Machine Learning
-- **scikit-learn** - 機械学習ライブラリ
-- **XGBoost** - 勾配ブースティング
-- **LightGBM** - 高速勾配ブースティング
-- **pandas/numpy** - データ処理
+## ローカル開発環境のセットアップ
 
-### Data Collection
-- **Selenium** - ブラウザ自動化
-- **BeautifulSoup4** - HTMLパーシング
-- **requests** - HTTP クライアント
+### 必要要件
 
-### Visualization
-- **matplotlib/seaborn** - 静的グラフ
-- **plotly** - インタラクティブグラフ
+- Python 3.11+
+- PostgreSQL
+- Redis
 
-### Infrastructure
-- **Docker/Docker Compose** - コンテナ化
-- **Nginx** - Webサーバー（本番環境）
-- **Gunicorn** - WSGIサーバー
+### インストール手順
 
-## 🚀 クイックスタート
-
-### 方法1: Docker（推奨・最も簡単）
-
-**必要なもの**: Docker Desktop + Git
-
+1. リポジトリをクローン
 ```bash
-# 1. リポジトリをクローン
-git clone https://github.com/Dicky1114/KEIBA.git
-cd KEIBA
-
-# 2. Dockerで起動（これだけ！）
-docker-compose up -d
+git clone https://github.com/Dicky1114/AI_KEIBA.git
+cd AI_KEIBA
 ```
 
-**アクセス**:
-- 管理画面: http://localhost:8000/admin/
-- API: http://localhost:8000/api/v1/
-- フロント画面: http://localhost:8000/
-
-### 方法2: Python環境
-
-**必要なもの**: Python 3.13+ + PostgreSQL 15+ + Redis 7+ + Git
-
+2. 仮想環境を作成して有効化
 ```bash
-# 1. リポジトリをクローン
-git clone https://github.com/Dicky1114/KEIBA.git
-cd KEIBA
-
-# 2. 仮想環境作成
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
+source venv/bin/activate  # Windowsの場合: venv\Scripts\activate
+```
 
-# 3. 依存関係インストール
-pip install -r requirements/development.txt
+3. 依存関係をインストール
+```bash
+pip install -r requirements.txt
+```
 
-# 4. 環境変数設定
-cp .env.example .env
-# .envファイルを編集（必要に応じて）
+4. 環境変数を設定（.envファイルを作成）
+```
+DEBUG=True
+SECRET_KEY=your-secret-key
+DB_NAME=d_db
+DB_USER=postgres
+DB_PASSWORD=your-password
+DB_HOST=localhost
+DB_PORT=5432
+REDIS_URL=redis://localhost:6379/0
+```
 
-# 5. データベース設定
-createdb keiba_db
+5. データベースマイグレーション
+```bash
 python manage.py migrate
-python manage.py createsuperuser
+```
 
-# 6. サーバー起動
+6. スーパーユーザーを作成
+```bash
+python manage.py createsuperuser
+```
+
+7. 開発サーバーを起動
+```bash
 python manage.py runserver
 ```
 
-## 📋 詳細セットアップ
+## Render.comへのデプロイ
 
-### 前提条件
+このプロジェクトは`render.yaml`を使用して自動的にデプロイされます。
 
-#### Docker使用の場合
-- Docker Desktop
-- Git
+1. Render.comでアカウントを作成
+2. GitHubリポジトリを接続
+3. 環境変数を設定
+4. デプロイを実行
 
-#### Python環境使用の場合
-- Python 3.13+
-- PostgreSQL 15+
-- Redis 7+
-- Git
+### 必要な環境変数
 
-### 環境変数の設定
+- `SECRET_KEY`: Djangoのシークレットキー
+- `DATABASE_URL`: PostgreSQLデータベースURL（SupabaseまたはRender PostgreSQL）
+- `REDIS_URL`: Redis接続URL
+- `DJANGO_SETTINGS_MODULE`: `app_config.settings.production`
 
-初回起動時に環境変数を設定する必要があります：
+## プロジェクト構造
 
-```bash
-# .envファイルを作成
-cp .env.example .env
-
-# .envファイルを編集（必要に応じて）
-# データベース設定、APIキーなどを設定
 ```
-
-### データベースの設定
-
-```bash
-# PostgreSQL データベース作成
-createdb keiba_db
-
-# マイグレーション
-python manage.py makemigrations
-python manage.py migrate
-
-# スーパーユーザー作成
-python manage.py createsuperuser
+AI_KEIBA/
+├── app_config/          # Django設定
+│   ├── settings/
+│   │   ├── base.py      # 基本設定
+│   │   ├── develop.py   # 開発環境設定
+│   │   └── production.py # 本番環境設定
+│   ├── urls.py
+│   └── wsgi.py
+├── app_folder/          # メインアプリケーション
+│   ├── models.py
+│   ├── views/
+│   ├── services/        # スクレイピング・データ処理
+│   └── migrations/
+├── accounts/            # ユーザー認証
+├── templates/           # HTMLテンプレート
+├── static/              # 静的ファイル
+├── build.sh             # Renderビルドスクリプト
+├── render.yaml          # Render設定
+└── requirements.txt     # Python依存関係
 ```
-
-## 🐳 Docker での起動
-
-### 開発環境
-```bash
-docker-compose up -d
-```
-
-### 本番環境
-```bash
-docker-compose -f docker-compose.yml --profile production up -d
-```
-
-### 停止
-```bash
-docker-compose down
-```
-
-## 🔄 別のパソコンでの使用
-
-1. **リポジトリをクローン**
-   ```bash
-   git clone https://github.com/Dicky1114/KEIBA.git
-   cd KEIBA
-   ```
-
-2. **Dockerで起動（推奨）**
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **またはPython環境で起動**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements/development.txt
-   python manage.py migrate
-   python manage.py runserver
-   ```
-
-**これだけで完全に動作する環境が構築できます！** 🎉
-
-## API エンドポイント
-
-### 認証
-- `POST /api/v1/accounts/login/` - ログイン
-- `POST /api/v1/accounts/logout/` - ログアウト
-- `POST /api/v1/accounts/register/` - ユーザー登録
-
-### レース
-- `GET /api/v1/races/` - レース一覧
-- `GET /api/v1/races/{id}/` - レース詳細
-- `GET /api/v1/races/{id}/entries/` - 出走馬一覧
-
-### 予測
-- `GET /api/v1/predictions/` - 予測一覧
-- `POST /api/v1/predictions/` - 予測作成
-- `GET /api/v1/predictions/{id}/` - 予測詳細
-
-### 分析
-- `GET /api/v1/analytics/race-stats/` - レース統計
-- `GET /api/v1/analytics/horse-performance/` - 馬の成績分析
-- `GET /api/v1/analytics/trends/` - トレンド分析
-
-## 主要機能
-
-### 1. データ収集（Scraping）
-- netkeiba.com からの自動データ収集
-- レース結果、馬情報、騎手情報の取得
-- レート制限とエラーハンドリング
-
-### 2. 予測システム
-- 複数の機械学習アルゴリズム
-- アンサンブル学習
-- 予測精度の評価と改善
-
-### 3. 分析機能
-- レース傾向分析
-- 馬の能力分析
-- 騎手の成績分析
-- 競馬場別の特徴分析
-
-### 4. 通知システム
-- 重要レースのリマインド
-- 予測結果の通知
-- システムアラート
-
-## 管理コマンド
-
-### データ収集
-```bash
-# 指定日のレースデータを収集
-python manage.py scrape_race_data --date 2024-01-01
-
-# 馬の過去成績を更新
-python manage.py update_horse_performance
-```
-
-### 予測
-```bash
-# 予測モデルを学習
-python manage.py train_prediction_model
-
-# 予測を実行
-python manage.py run_predictions --date 2024-01-01
-```
-
-### データ管理
-```bash
-# データベースのバックアップ
-python manage.py backup_database
-
-# 古いログファイルを削除
-python manage.py cleanup_logs --days 30
-```
-
-## テスト
-
-### 全テスト実行
-```bash
-pytest
-```
-
-### カバレッジ付きテスト
-```bash
-pytest --cov=apps --cov-report=html
-```
-
-### 特定のアプリのテスト
-```bash
-pytest tests/test_predictions/
-```
-
-## コード品質
-
-### フォーマット
-```bash
-black .
-isort .
-```
-
-### リンティング
-```bash
-flake8
-```
-
-### pre-commit フック
-```bash
-pre-commit install
-pre-commit run --all-files
-```
-
-## デプロイメント
-
-### ステージング環境
-```bash
-# 環境変数設定
-export DJANGO_SETTINGS_MODULE=config.settings.staging
-
-# 静的ファイル収集
-python manage.py collectstatic --noinput
-
-# マイグレーション
-python manage.py migrate
-
-# サーバー起動
-gunicorn config.wsgi:application
-```
-
-### 本番環境
-```bash
-# Docker Compose での本番デプロイ
-docker-compose -f docker-compose.yml --profile production up -d
-```
-
-## 監視とログ
-
-### ログファイル
-- `logs/django/` - Djangoログ
-- `logs/celery/` - Celeryログ
-- `logs/scraping/` - スクレイピングログ
-- `logs/ml/` - 機械学習ログ
-
-### ヘルスチェック
-- `GET /health/` - システム状態確認
-
-## トラブルシューティング
-
-### よくある問題
-
-1. **データベース接続エラー**
-   ```bash
-   # PostgreSQLサービス確認
-   sudo systemctl status postgresql
-   
-   # 接続設定確認
-   python manage.py dbshell
-   ```
-
-2. **Celeryタスクが実行されない**
-   ```bash
-   # Celeryワーカー起動
-   celery -A config worker --loglevel=info
-   
-   # タスク確認
-   celery -A config inspect active
-   ```
-
-3. **スクレイピングエラー**
-   ```bash
-   # ChromeDriverの確認
-   which chromedriver
-   
-   # ログ確認
-   tail -f logs/scraping/scraping.log
-   ```
-
-## 貢献
-
-1. フォークを作成
-2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add amazing feature'`)
-4. ブランチをプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを作成
 
 ## ライセンス
 
-このプロジェクトは MIT ライセンスの下で公開されています。
+このプロジェクトは個人使用のためのものです。
 
-## サポート
+## 作者
 
-- Issue: [GitHub Issues](link-to-issues)
-- ドキュメント: [docs/](docs/)
-- API仕様書: [docs/api/](docs/api/)
-
----
-
-**注意**: このシステムは教育・研究目的で開発されています。実際の賭博行為は法律で禁止されている場合がありますので、各地域の法律に従ってご利用ください。
-# KEIBA
+Dicky1114

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ai-keiba
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn app_config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: app_config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-keiba-db
+          property: connectionString
+      - key: REDIS_URL
+        sync: false
+    autoDeploy: true
+
+databases:
+  - name: ai-keiba-db
+    databaseName: ai_keiba
+    user: ai_keiba_user
