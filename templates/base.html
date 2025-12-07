@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <!-- CSRFトークンをmetaタグに埋め込む -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    {% block extra_title %}{% endblock %}
+
+    <!-- Jquery ファイル読み込み -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    
+    {% block extra_js %}{% endblock %}
+    <!-- Import Google Fonts 読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+
+    <!-- CSS ファイル読み込み -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap">
+    {% block extrastyle %}{% endblock %}
+
+    <!-- アイコン読み込み -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="apple-touch-icon-precomposed" href="{% static 'images/apple-touch-icon-precomposed.png' %}">
+        
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <nav class="Cus-Navbar" id="bs-navbar">
+        <div class="Nav-left">
+            {% block extra_nav_title %}{% endblock %}
+        </div>
+        <div class="Nav-right">
+            <a class="Nav-link" href="/app_folder/login">Logout</a>
+        </div>
+    </nav>
+
+    <!-- サイドバーコンテンツ-->
+    <div id="content" class="Cus-Navbar-side">
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/app_folder/dashboard">DashBoard</a>
+        </nav>
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/app_folder/data_acquisition">Data Acquisition</a>
+        </nav>
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/#">Learning</a>
+        </nav>
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/#">Prediction</a>
+        </nav>
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/#">Analysis</a>
+        </nav>
+        <nav class="Nav-link1">
+            <a class="Nav-link1" href="/#">Model Management</a>
+        </nav>
+    </div>
+
+    <div class="Main-space">
+        <!-- メインコンテンツ-->
+        {% block content %}
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endblock %}
+    </div>
+    <!-- Feather icons for the sidebar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+    <script>feather.replace()</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

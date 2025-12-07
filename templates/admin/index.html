@@ -1,0 +1,60 @@
+{% extends "admin/base_site.html" %}
+{% load static %} 
+
+{% block extra_css %}
+{% endblock %}
+
+{% block extrastyle %}
+  <link rel="stylesheet" href="{% static 'css/admin_style.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="app-app_folder module">
+    <table class="tbl-list">
+      <caption>
+        <span class="section">1. 機能一覧（データ取得）</apan>
+      </caption>
+          <tr class="model-get" >
+            <th scope="row" id="app_folder-get">
+                <a href="{% url 'custom_admin:scraping' %}?type=race">1-1. レース情報（URL、レース、結果）の取得</a>
+            </th>
+          </tr>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+              <a href="{% url 'custom_admin:scraping' %}?type=horse">1-2. 馬のレース履歴の取得</a>
+            </th>
+          </tr>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+              <a href="{% url 'custom_admin:scraping' %}?type=jockey">1-3. 騎手のレース履歴の取得</a>
+            </th>
+          </tr>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+              <a href="{% url 'custom_admin:scraping' %}?type=apply">1-4. 学習データへの反映</a>
+            </th>
+          </tr>
+    </table>
+
+    <table class="tbl-list">
+      <caption>
+        <span class="section">2. 機能一覧（モデル作成）</apan>
+      </caption>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+                <a href="{% url 'custom_admin:training' %}?type=train">2-1. トレーニングデータ決定</a>
+            </th>
+          </tr>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+              <a href="{% url 'custom_admin:scraping' %}?type=horse">2-2. パラメーターの変更</a>
+            </th>
+          </tr>
+          <tr class="model-get">
+            <th scope="row" id="app_folder-get">
+              <a href="{% url 'custom_admin:scraping' %}?type=apply">2-3. トレーニングと結果</a>
+            </th>
+          </tr>
+    </table>
+  </div>
+{% endblock %}

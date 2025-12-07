@@ -1,0 +1,105 @@
+<!-- 継承 -->
+{% extends "admin/base_site.html" %}
+
+<!-- staticファイルのLoad -->
+{% load static %}
+
+<!-- cssファイルの読み込み -->
+{% block extrastyle %}
+  <link rel="stylesheet" href="{% static 'css/admin_style.css' %}">
+{% endblock %}
+
+<!-- パンくずリストの作成 -->
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">ホーム</a>
+    &rsaquo;
+    {% if data_type == 'race' %}
+      スクレイピング(レース情報)
+    {% elif data_type == 'horse' %}
+      スクレイピング(馬情報)
+    {% elif data_type == 'jockey' %}
+      スクレイピング(騎手情報)
+    {% elif data_type == 'apply' %}
+      データ反映
+    {% endif %}
+  </div>
+{% endblock %}
+
+<!-- カスタムコンテンツ -->
+{% block content %}
+  <!-- 操作画面 -->
+  <div class="app-app_folder module">
+    <div class="form-flex-container">
+      <!-- レース基本情報取得時の画面 -->
+      {% if data_type == 'race' %}
+        <h2 class="head2">1. レース情報（URL、レース、結果）の取得/更新</h2>
+        <div>
+        <form class="main-action" method="POST" action="{% url 'custom_admin:scraping' %}?type=race">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="start_date">開始日付</label>
+            {{ form.start_date }}
+          </div>
+          <div class="form-group">
+            <label for="end_date">終了日付</label>
+            {{ form.end_date }}
+          </div>
+          <div class="btn-grp">
+            <button type="submit" class="def-btn" id="start-btn">実行ボタン</button>
+            <button type="button" class="def-btn" id="stop-btn" disabled>停止ボタン</button>
+            <div id="status" style="display: none;"></div>
+          </div>
+        </form>
+      </div>
+      <div>
+        <p class="p-tab-head"></p>
+        <p class="p-tab">1. 日付を指定する。</p>
+        <p class="p-tab">2. 実行ボタンを押下する。</p>
+        <p class="p-tab">3. 実行終了するまで、待機する。</p>
+        <p class="p-tab">※&nbsp;途中で実行終了したい場合は、停止ボタンを押下する。</p>
+      </div>
+      <!-- 馬情報取得時の画面 -->
+      {% elif data_type == 'horse' %}
+        <h2>2. 馬のレース履歴の取得</h2>
+        <form method="POST" action="{% url 'custom_admin:scraping' %}?type=horse">
+          {% csrf_token %}
+          <button type="submit" class="def-btn" id="start-btn">実行ボタン</button>
+          <button type="button" class="def-btn" id="stop-btn">停止ボタン</button>
+        </form>
+
+      <!-- 騎手情報取得時の画面 -->
+      {% elif data_type == 'jockey' %}
+        <h2>3. 騎手のレース履歴の取得</h2>
+        <form method="POST" action="{% url 'custom_admin:scraping' %}?type=jockey">
+          {% csrf_token %}
+          <button type="submit" class="def-btn" id="start-btn">実行ボタン</button>
+          <button type="button" class="def-btn" id="stop-btn">停止ボタン</button>
+        </form>
+      
+      <!-- トレーニング処理用の画面 -->
+      {% elif data_type == 'apply' %}
+        <h2>4. トレーニングデータの更新</h2>
+        <form method="POST" action="{% url 'custom_admin:scraping' %}?type=apply">
+          {% csrf_token %}
+          <button type="submit" class="def-btn" id="start-btn">実行ボタン</button>
+          <button type="button" class="def-btn" id="stop-btn">停止ボタン</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  <!-- スクレイピング中の画面 -->
+  {% if task_id %}
+  <div class="progress mt-4" style="height: 30px;">
+    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+        role="progressbar" style="width: 0%">開始中...</div>
+  </div>
+  {% endif %}
+
+  <!-- Jsファイル読み込みブロック -->
+  {% block script_extra %}
+    <!-- Progress Bar -->
+    <script src="{% static 'js/scraping.js' %}"></script>
+  {% endblock %}
+{{ block.super }}
+{% endblock %}

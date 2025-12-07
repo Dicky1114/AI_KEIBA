@@ -1,0 +1,102 @@
+<!-- 継承元設定 -->
+{% extends "admin/base_site.html" %}
+<!-- Staricフォルダ読込 -->
+{% load static %}
+<!-- スタイルシート読込 -->
+{% block extrastyle %}
+  <link rel="stylesheet" href="{% static 'css/admin_style.css' %}">
+{% endblock %}
+<!-- パンくずリストの作成 -->
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">ホーム</a>
+    &rsaquo;
+    {% if data_type == 'train' %}
+      トレーニングデータ決定
+    {% elif data_type == '' %}
+      テスト
+    {% endif %}
+  </div>
+{% endblock %}
+
+<!-- コンテンツ作成 -->
+{% block content %}
+  <!-- ブロックの継承 -->
+  {{ block.super }}
+  <div class="form-flex-container">
+    <!-- トレーニングデータ決定画面 -->
+    {% if data_type == 'train' %}
+    <form method="POST" action="{% url 'custom_admin:training' %}?type=train">
+      <h2>1. トレーニングデータ決定</h2>
+      {% csrf_token %}
+
+      <!-- ヘッダー設定 -->
+      <div class="item-flex-container">
+        <div class="item-flex-label">
+          <!-- データ範囲日付ヘッダの設定 -->
+          <h2>1-1. データ範囲</h2>
+        </div>
+        <!-- 各チェックボックスヘッダの設定 -->
+        {% for field in form.visible_fields %}
+          {% if forloop.counter0 >= 2 %}
+            <div class="item-flex-label">
+              <h2>1-{{ forloop.counter0 }}. {{ field.label }}</h2>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- コントロール設定 -->
+      <div class="item-flex-container">
+        <!-- 日付コントロールのグループ化 -->
+        <div class="item-flex-option">
+          <!-- 開始日付コントロール -->
+          <div class="form-group">
+            <label for="start_date">開始日付</label>
+            {{ form.start_date }}
+          </div>
+          <!-- 終了日付コントロール -->
+          <div class="form-group">
+            <label for="end_date">終了日付</label>
+            {{ form.end_date }}
+          </div>
+        </div>
+
+        <!-- チェックボックス設定（アイテム設定） -->
+        {% for field in form.visible_fields %}
+          {% if forloop.counter0 >= 2 %}
+            <div class="item-flex-option">
+              {{ field }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div> 
+    
+      <!-- ボタン設定 -->
+      <div class="btn-grp-500">
+        <button type="submit" class="def-btn" id="start-btn">CSV出力ボタン</button>
+        <button type="button" class="def-btn" id="stop-btn" disabled>停止ボタン</button>
+        <button type="button" class="def-btn" onclick="toggleAll(true)">すべて選択</button>
+        <button type="button" class="def-btn" onclick="toggleAll(false)">すべて解除</button>
+        <div id="status" style="display: none;"></div>
+      </div>
+
+    </form>
+
+    <!-- 説明 -->
+    <div>
+      <p class="p-tab-head"></p>
+      <p class="p-tab">1. 学習データの取得範囲を設定する。</p>
+      <p class="p-tab">2. 取得する列を指定する。</p>
+      <p class="p-tab">3. CSV出力ボタンを押下する。</p>
+      <p class="p-tab">※&nbsp;途中で実行終了したい場合は、停止ボタンを押下する。</p>
+    </div>
+  {% endif %}
+  
+  <!-- Jsファイル読み込みブロック -->
+  {% block script_extra %}
+    <!-- 全選択・解除機能 -->
+    <script src="{% static 'js/selected.js' %}"></script>
+  {% endblock %}
+
+{% endblock %}

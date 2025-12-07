@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/data_acquisition_style.css' %}">
+{% endblock %}
+
+{% block extra_title %}
+  <title>Data Acquisition</title>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/data_acquisition.js' %}" defer></script>
+{% endblock %}
+
+{% block extra_nav_title %}
+  <a class="Nav-link" href="/horse/data_acquisition">Data Acquisition</a>
+{% endblock %}
+
+{% block content %}
+<div class="server_message">
+  {% if error_messages %}
+    <div class="error_messages">
+        <p>{{ error }}</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<form class="data_form" method="POST" action="{% url 'horse:data_acquisition' %}">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="start_date">Start Date</label>
+    {{ form.start_date }}
+  </div>
+
+  <div class="form-group">
+    <label for="end_date">End Date</label>
+    {{ form.end_date }}
+  </div>
+
+  <button type="submit" class="get_button">Get Data</button>
+</form>
+
+
+
+{% endblock %}

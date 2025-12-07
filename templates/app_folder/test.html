@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+{% endblock %}
+
+{% block extra_title %}
+  <title>test</title>
+{% endblock %}
+
+{% block extra_nav_title %}
+  <a class="Nav-link" href="/horse/test">test</a>
+{% endblock %}
+
+{% block content %}
+  <h2>test</h2>
+  <div class="server_message"></div>
+  <!-- <form class="login_form" method="POST" action="{% url 'horse:test' %}">
+      {% csrf_token %}
+
+      <div class="test_text">test</div>
+      {{ form.test_text }}
+
+      <button type="submit" class="login_button">test</button>
+
+  </form> -->
+  <button type="submit" class="login_button2">test2</button>
+    {% csrf_token %}
+  <script>
+    $(function() {
+      $(document).on('click', '.login_button2', function() {
+        console.log("hello");
+        $('.server_message').empty();
+        $.ajax({
+        url: "{% url 'horse:test' %}",
+            type: 'POST',
+            dataType: 'text',
+            headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')  },
+            data: {
+              'test_message': "message_detail"
+            }
+          }).done(function(data) {
+                  console.log(data);
+                  $('.server_message').append(data);
+            }).fail(function(data) {
+
+            });
+      });
+
+    });  
+  </script>
+{% endblock %}

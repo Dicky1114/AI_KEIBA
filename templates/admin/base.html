@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+
+<!-- ログイン情報のブロック作成 -->
+{% block usertools %}
+  <div id="user-tools">
+    ようこそ <strong>{{ request.user }}</strong>.
+    <a href="/">サイトを表示</a> /
+    <a href="{% url 'admin:password_change' %}">パスワードの変更</a> /
+    <form id="logout-form" method="post" action="/admin/logout/">
+        <input type="hidden" name="csrfmiddlewaretoken" value="aF7pKtYFE5HCCuz94BdFrhru2MCNQrMByHy0cGh9ptyhEQdG8V3N9ThLWhhSIcLL">
+        <button type="submit" class="button">ログアウト</button>
+      </form>
+      
+      <button class="button theme-toggle">
+        <span class="visually-hidden theme-label-when-auto">テーマを切り替え (現在のテーマ: 自動)</span>
+        <span class="visually-hidden theme-label-when-light">テーマを切り替え (現在のテーマ: ライト)</span>
+        <span class="visually-hidden theme-label-when-dark">テーマを切り替え (現在のテーマ: ダーク)</span>
+        <svg aria-hidden="true" class="theme-icon-when-auto">
+          <use xlink:href="#icon-auto"></use>
+        </svg>
+        <svg aria-hidden="true" class="theme-icon-when-dark">
+          <use xlink:href="#icon-moon"></use>
+        </svg>
+        <svg aria-hidden="true" class="theme-icon-when-light">
+          <use xlink:href="#icon-sun"></use>
+        </svg>
+      </button>
+  </div>
+{% endblock %}
+
+<!-- パンくずリストのブロック作成 -->
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">ホーム</a>
+  </div>
+{% endblock %}
+
+<div class="main shifted" id="main">
+  <!-- サイドバー開閉ボタン -->
+  <button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="ナビゲーションを切り替えます"></button>
+
+  <!-- サイドバー -->
+  <nav class="sticky" id="nav-sidebar" aria-label="サイドバー" aria-expanded="true">
+    <input type="search" id="nav-filter" placeholder="絞り込みの入力..." aria-label="ナビゲーション項目の絞り込み">
+
+    {% if available_apps %}
+      {% for app in available_apps %}
+        <div class="app-{{ app.app_label }} module">
+          <table>
+            <caption>
+              <a href="{{ app.app_url }}" class="section" title="{{ app.name }} アプリケーション内のモデル">
+                テーブル一覧
+              </a>
+            </caption>
+            <tbody>
+              {% for model in app.models %}
+                <tr class="model-{{ model.object_name|lower }}">
+                  <th scope="row" id="{{ app.app_label }}-{{ model.object_name|lower }}">
+                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                  </th>
+                  <td>
+                    {% if model.add_url %}
+                      <a href="{{ model.add_url }}" class="addlink" aria-describedby="{{ app.app_label }}-{{ model.object_name|lower }}">追加</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </nav>
+
+  <!-- メインコンテンツ -->
+  <main id="content-start" class="content" tabindex="-1">
+    {% block content %}
+    <!-- 各ビューでここを上書き -->
+    {% endblock %}
+  </main>
+</div>
+

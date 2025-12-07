@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+{% endblock %}
+
+{% block extra_title %}
+  <title>DashBoard</title>
+{% endblock %}
+
+{% block extra_nav_title %}
+  <a class="Nav-link" href="/horse/dashboard">DashBoard</a>
+{% endblock %}
+
+{% block content %}
+    <div class="frame">
+      <h3>掛金</h3>
+      <p>1,002,000円</p>
+    </div>
+    <div class="frame">
+      <h3>回収金額</h3>
+      <p>1,234,000円</p>
+    </div>
+    <div class="frame">
+      <h3>回収率</h3>
+      <p>122%</p>
+    </div>
+    <div class="frame">
+      <h3>勝率</h3>
+      <p>48%</p>
+    </div>
+    
+
+{% endblock %}

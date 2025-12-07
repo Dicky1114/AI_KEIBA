@@ -1,0 +1,9 @@
+.frame {
+    display: block;
+    background: rgba(0, 0, 0, 0.6);
+    width: 10rem;
+    height: 7rem;
+    text-align: center;
+    border-radius: 1rem;
+    margin-right: 1rem;
+}

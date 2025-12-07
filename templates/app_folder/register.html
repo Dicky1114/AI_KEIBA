@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+  <title>Register</title>
+
+  <!-- Import Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login_style.css' %}">
+
+  <!-- Js Files -->
+  <script src="{% static 'js/register.js' %}" defer></script>
+</head>
+
+<body>
+  <div class="main">
+
+    <h2>Register</h2>
+
+    <form class="register_form" method="POST" action="{% url 'horse:register' %}">
+      {% csrf_token %}
+      
+      <div class="username_title">Username</div>
+      {{ form.username }}
+
+      <div class="password_title">Password</div>
+      {{ form.password }}
+
+      <div class="mail_title">Email Address</div>
+      {{ form.mail }}
+
+      <button class="login_button" type="submit">Register</button>
+    </form>
+
+    <!-- Registration successful -->
+    {% if success %}
+    <div id="success-message" class="alert">
+      <p>Registration successful</p>
+      <button id="close-button">OK</button>
+    </div>
+    {% endif %}
+
+  </div>
+</body>
+
+</html>

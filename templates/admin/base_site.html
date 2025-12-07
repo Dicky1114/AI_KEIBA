@@ -1,0 +1,56 @@
+<!-- 継承 -->
+{% extends "admin/base.html" %}
+
+<!-- staticファイルのLoad -->
+{% load static %}
+
+<!-- 全体タブのタイトル設定 -->
+{% block title %}
+  【管理画面】競馬予測ツール
+{% endblock %}
+
+<!-- 全体アプリのタイトル設定 -->
+{% block branding %}
+  <h1 id="site-name"><a href="{% url 'admin:index' %}">【管理画面】競馬予測</a></h1>
+{% endblock %}
+
+<!-- ログイン情報の継承 -->
+{% block usertools %}
+  {{ block.super }}
+{% endblock %}
+
+<!-- パンくずリストの継承 -->
+{% block breadcrumbs %}
+   {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+{% endblock %}
+
+{% block content_title %}
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  {{ block.super }}
+{% endblock %}
+
+{% block sidebar %}
+  {{ block.super }}
+{% endblock %}
+
+{% block nav_sidebar %}
+  {{ block.super }}
+{% endblock %}
+
+{% block nav_global %}
+  {{ block.super }}
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+{% endblock %}
+
+
+

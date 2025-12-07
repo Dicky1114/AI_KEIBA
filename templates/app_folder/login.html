@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <title>Login</title>
+
+    <!-- Import Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login_style.css' %}">
+</head>
+<body>
+  <div class="main">
+
+    <h2>Login</h2>
+
+    <form class="login_form" method="POST" action="{% url 'horse:login' %}">
+        {% csrf_token %}
+
+        <div class="username_title">Username</div>
+        {{ form.username }}
+
+        <div class="password_title">Password</div>
+        {{ form.password }}
+
+        <button type="submit" class="login_button">Login</button>
+
+        <a class="register_link" href="{% url 'horse:register' %}">Register a new account</a>
+    </form>
+  </div>
+</body>
+</html>
