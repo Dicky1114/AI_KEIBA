@@ -2,14 +2,16 @@
 # exit on error
 set -o errexit
 
-# Install dependencies
+echo "=== Step 1: pip upgrade ==="
 pip install --upgrade pip
+
+echo "=== Step 2: pip install requirements ==="
 pip install -r requirements.txt
 
-# Collect static files
+echo "=== Step 3: collectstatic ==="
 python manage.py collectstatic --no-input
 
-# Run migrations
+echo "=== Step 4: migrate ==="
 python manage.py migrate
 
-echo "Build completed successfully!"
+echo "=== Build completed successfully! ==="
