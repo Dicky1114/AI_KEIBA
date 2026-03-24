@@ -372,6 +372,7 @@ def stacking(base_predictions, y_true):
     return meta_model.predict_proba(base_predictions)[:, 1]
 
 def enhanced_network(input_data, target_data):
+    pass
 
 
 def bk():
