@@ -262,7 +262,7 @@ class GetRaceID():
             race_dates = WeekEndView.objects.filter(
                 race_date__gte=datetime_A.date(start_year, start_month, start_day),
                 race_date__lte=datetime_A.date(end_year, end_month, end_day)).values("race_date").distinct().order_by("race_date")
-            race_date_links    = [f"https://race.netkeiba.com/top/race_list.html?kaisai_date={date["race_date"].strftime("%Y%m%d")}" for date in race_dates]    
+            race_date_links    = [f"https://race.netkeiba.com/top/race_list.html?kaisai_date={date['race_date'].strftime('%Y%m%d')}" for date in race_dates]
             self.calendar_links_set.update(race_date_links)
             self.calendar_links_set = sorted(self.calendar_links_set)
 
