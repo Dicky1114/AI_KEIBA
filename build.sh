@@ -11,7 +11,4 @@ pip install -r requirements.txt
 echo "=== Step 3: collectstatic ==="
 python manage.py collectstatic --no-input
 
-echo "=== Step 4: migrate ==="
-python manage.py migrate
-
 echo "=== Build completed successfully! ==="
