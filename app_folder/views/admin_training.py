@@ -147,7 +147,7 @@ class  TrainingView(View):
                     # CSV出力先の絶対パス
                     csv_dir = os.path.join(settings.MEDIA_ROOT, "csv_export")
                     os.makedirs(csv_dir, exist_ok=True)
-                    csv_name = f"train_data_{localtime(now()).strftime("%Y%m%d_%H%M%S")}.csv"
+                    csv_name = f"train_data_{localtime(now()).strftime('%Y%m%d_%H%M%S')}.csv"
                     csv_path = os.path.join(csv_dir, csv_name)
                     from django.forms.models import model_to_dict
 
