@@ -21,7 +21,7 @@
 
     <h2>Login</h2>
 
-    <form class="login_form" method="POST" action="{% url 'horse:login' %}">
+    <form class="login_form" method="POST" action="{% url 'login' %}">
         {% csrf_token %}
 
         <div class="username_title">Username</div>
@@ -31,8 +31,6 @@
         {{ form.password }}
 
         <button type="submit" class="login_button">Login</button>
-
-        <a class="register_link" href="{% url 'horse:register' %}">Register a new account</a>
     </form>
   </div>
 </body>
