@@ -1067,4 +1067,45 @@ class JockeyInfoView(models.Model):
 
 #     def __str__(self):
 #         return f'{self.horse_id} - {self.horse_name}'
+
+
+# ─── 売上・案件管理 ───────────────────────────────────────────────────────────
+class SalesProject(models.Model):
+    class Meta:
+        db_table = 't_sales_project'
+        ordering = ['-entry_month', 'cl_name']
+        verbose_name = "案件"
+        verbose_name_plural = "案件一覧"
+
+    STATUS_CHOICES = [
+        ('negotiating', '商談中'),
+        ('ordered',     '受注済'),
+        ('in_progress', '進行中'),
+        ('completed',   '完了'),
+        ('lost',        '失注'),
+    ]
+
+    id             = models.AutoField(primary_key=True)
+    entry_month    = models.DateField(null=True, blank=True, db_comment="入金月")
+    cl_name        = models.CharField(max_length=255, db_comment="CL名")
+    project_name   = models.CharField(max_length=255, db_comment="案件名")
+    sales_amount   = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="売上")
+    outsource_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="外注費")
+    gross_profit   = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="粗利")
+    gross_profit_rate = models.DecimalField(max_digits=5, decimal_places=1, default=0, db_comment="粗利率(%)")
+    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='negotiating', db_comment="ステータス")
+    memo           = models.TextField(blank=True, default='', db_comment="メモ")
+    created_at     = models.DateTimeField(auto_now_add=True)
+    updated_at     = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.gross_profit = self.sales_amount - self.outsource_amount
+        if self.sales_amount and self.sales_amount > 0:
+            self.gross_profit_rate = round(float(self.gross_profit) / float(self.sales_amount) * 100, 1)
+        else:
+            self.gross_profit_rate = 0
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.cl_name} - {self.project_name}"
 # endregion

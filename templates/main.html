@@ -240,6 +240,178 @@
       line-height: 2.2;
     }
 
+    /* ─── SALES TAB ─── */
+    .sales-kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .kpi-goal-bar {
+      background: rgba(6,6,20,0.85);
+      border: 1px solid rgba(79,210,255,0.12);
+      border-radius: 8px;
+      padding: 18px 20px;
+      grid-column: span 4;
+    }
+    .kpi-goal-bar h3 {
+      font-size: 0.6rem;
+      color: rgba(79,210,255,0.55);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .kpi-bar-track {
+      height: 8px;
+      background: rgba(79,210,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .kpi-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4fd2ff 0%, #00ff88 100%);
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(79,210,255,0.5);
+      transition: width 0.6s ease;
+    }
+    .kpi-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.58rem;
+      color: rgba(79,210,255,0.45);
+      letter-spacing: 1px;
+    }
+    .sales-charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .chart-card {
+      background: rgba(6,6,20,0.85);
+      border: 1px solid rgba(79,210,255,0.12);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .chart-card h3 {
+      font-size: 0.6rem;
+      color: rgba(79,210,255,0.55);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    /* 案件テーブル */
+    .sales-table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .sales-table-header h3 {
+      font-size: 0.7rem;
+      color: #4fd2ff;
+      letter-spacing: 2px;
+    }
+    .sales-table-actions { display: flex; gap: 8px; align-items: center; }
+    .tbl-wrap {
+      background: rgba(6,6,20,0.85);
+      border: 1px solid rgba(79,210,255,0.12);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.68rem;
+    }
+    .tbl th {
+      background: rgba(79,210,255,0.06);
+      color: rgba(79,210,255,0.7);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(79,210,255,0.1);
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+    .tbl td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(79,210,255,0.06);
+      color: #c8d8e8;
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: rgba(79,210,255,0.03); }
+    .tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tbl td.pos { color: #00ff88; }
+    .tbl td.neg { color: #ff5555; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.58rem;
+      letter-spacing: 1px;
+    }
+    .badge-negotiating { background: rgba(79,210,255,0.1); color: #4fd2ff; border: 1px solid rgba(79,210,255,0.3); }
+    .badge-ordered     { background: rgba(255,200,0,0.1);  color: #ffc800; border: 1px solid rgba(255,200,0,0.3); }
+    .badge-in_progress { background: rgba(255,128,0,0.1);  color: #ff8c00; border: 1px solid rgba(255,128,0,0.3); }
+    .badge-completed   { background: rgba(0,255,136,0.1);  color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+    .badge-lost        { background: rgba(255,60,60,0.08); color: #ff6060; border: 1px solid rgba(255,60,60,0.3); }
+    .tbl-empty {
+      text-align: center;
+      padding: 40px;
+      color: rgba(79,210,255,0.25);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+    }
+    /* モーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #05050f;
+      border: 1px solid rgba(79,210,255,0.2);
+      border-radius: 10px;
+      padding: 28px 32px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal h2 { font-size: 0.85rem; color: #4fd2ff; letter-spacing: 3px; margin-bottom: 22px; }
+    .modal .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal .form-grid .full { grid-column: span 2; }
+    .modal label { display: block; font-size: 0.58rem; color: rgba(79,210,255,0.5); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(79,210,255,0.18);
+      border-radius: 4px;
+      color: #d0d8e8;
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: rgba(79,210,255,0.55); }
+    .modal select option { background: #05050f; }
+    .modal textarea { resize: vertical; min-height: 60px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    @media (max-width: 900px) {
+      .sales-kpi { grid-template-columns: repeat(2,1fr); }
+      .kpi-goal-bar { grid-column: span 2; }
+      .sales-charts { grid-template-columns: 1fr; }
+    }
+
     /* ─── SCROLLBAR ─── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
@@ -305,6 +477,7 @@
     <button class="tab-btn{% if active_tab == 'data' or not active_tab %} active{% endif %}" onclick="showTab('data',this)">データ取得</button>
     <button class="tab-btn{% if active_tab == 'train' %} active{% endif %}" onclick="showTab('train',this)">学習 / CSV出力</button>
     <button class="tab-btn{% if active_tab == 'predict' %} active{% endif %}" onclick="showTab('predict',this)">予測・分析</button>
+    <button class="tab-btn{% if active_tab == 'sales' %} active{% endif %}" onclick="showTab('sales',this); loadSales();">売上・案件管理</button>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -446,8 +619,151 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════
+       TAB: 売上・案件管理
+  ════════════════════════════════════════ -->
+  <div id="pane-sales" class="tab-pane{% if active_tab == 'sales' %} active{% endif %}">
+
+    <!-- KPI 集計カード -->
+    <div class="sales-kpi" id="sales-kpi">
+      <div class="stat">
+        <div class="stat-lbl">総売上</div>
+        <div class="stat-val" id="kpi-sales">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">総粗利</div>
+        <div class="stat-val pos" id="kpi-gross">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">案件数</div>
+        <div class="stat-val" id="kpi-count">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">平均粗利率</div>
+        <div class="stat-val pos" id="kpi-rate">—</div>
+      </div>
+      <!-- 目標バー -->
+      <div class="kpi-goal-bar">
+        <h3>売上目標進捗
+          <span style="font-size:.55rem; color:rgba(79,210,255,0.35); margin-left:10px;">目標:
+            <input id="goal-input" type="number" value="15000000"
+              style="width:110px;padding:2px 6px;font-size:.7rem;background:rgba(255,255,255,0.04);border:1px solid rgba(79,210,255,0.18);border-radius:3px;color:#4fd2ff;font-family:inherit;"
+              onchange="updateGoalBar()">円
+          </span>
+        </h3>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="goal-bar" style="width:0%"></div></div>
+        <div class="kpi-bar-labels">
+          <span id="goal-label-left">¥0</span>
+          <span id="goal-label-pct">0%</span>
+          <span id="goal-label-right">目標: ¥15,000,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- グラフ -->
+    <div class="sales-charts">
+      <div class="chart-card">
+        <h3>月次売上 / 粗利</h3>
+        <canvas id="chart-monthly" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>ステータス別 案件数</h3>
+        <canvas id="chart-status" height="180"></canvas>
+      </div>
+    </div>
+
+    <!-- 案件テーブル -->
+    <div class="sales-table-header">
+      <h3>案件一覧</h3>
+      <div class="sales-table-actions">
+        <select id="sales-filter-status" class="btn" style="padding:6px 10px; font-size:.65rem;" onchange="loadSales()">
+          <option value="">全ステータス</option>
+          <option value="negotiating">商談中</option>
+          <option value="ordered">受注済</option>
+          <option value="in_progress">進行中</option>
+          <option value="completed">完了</option>
+          <option value="lost">失注</option>
+        </select>
+        <label class="btn btn-csv" style="cursor:pointer;">
+          CSV取込
+          <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="importCsv(this)">
+        </label>
+        <button class="btn btn-run" onclick="openModal()">＋ 追加</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>入金月</th>
+            <th>CL名</th>
+            <th>案件名</th>
+            <th>売上</th>
+            <th>外注費</th>
+            <th>粗利</th>
+            <th>粗利率</th>
+            <th>ステータス</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sales-tbody">
+          <tr><td colspan="9" class="tbl-empty">LOADING…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 案件追加/編集モーダル -->
+  <div class="modal-overlay" id="sales-modal">
+    <div class="modal">
+      <h2 id="modal-title">案件追加</h2>
+      <input type="hidden" id="modal-id">
+      <div class="form-grid">
+        <div>
+          <label>入金月 (YYYY-MM)</label>
+          <input type="month" id="modal-entry-month">
+        </div>
+        <div>
+          <label>ステータス</label>
+          <select id="modal-status">
+            <option value="negotiating">商談中</option>
+            <option value="ordered">受注済</option>
+            <option value="in_progress">進行中</option>
+            <option value="completed">完了</option>
+            <option value="lost">失注</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>CL名 *</label>
+          <input type="text" id="modal-cl" placeholder="クライアント名">
+        </div>
+        <div class="full">
+          <label>案件名 *</label>
+          <input type="text" id="modal-project" placeholder="案件名">
+        </div>
+        <div>
+          <label>売上 (円)</label>
+          <input type="number" id="modal-sales" value="0" min="0">
+        </div>
+        <div>
+          <label>外注費 (円)</label>
+          <input type="number" id="modal-outsource" value="0" min="0">
+        </div>
+        <div class="full">
+          <label>メモ</label>
+          <textarea id="modal-memo" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-stop" onclick="closeModal()">キャンセル</button>
+        <button class="btn btn-run" onclick="saveProject()">保存</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
   // ── Tab switch ──────────────────────────────
   function showTab(name, btn) {
@@ -461,6 +777,218 @@
   function toggleAll(v) {
     document.querySelectorAll('#form-train input[type="checkbox"]').forEach(c => c.checked = v);
   }
+
+  // ── Sales Tab ────────────────────────────────
+  const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+  let chartMonthly = null;
+  let chartStatus  = null;
+  let salesLoaded  = false;
+
+  function fmt(n) {
+    if (n === undefined || n === null) return '—';
+    return '¥' + Number(n).toLocaleString('ja-JP');
+  }
+
+  function loadSales() {
+    const status = document.getElementById('sales-filter-status')?.value || '';
+    fetch('/sales/list/' + (status ? '?status=' + status : ''))
+      .then(r => r.json())
+      .then(data => {
+        renderSalesKpi(data.totals);
+        renderSalesTable(data.projects);
+        renderChartMonthly(data.monthly);
+        renderChartStatus(data.projects);
+        salesLoaded = true;
+      })
+      .catch(() => {
+        document.getElementById('sales-tbody').innerHTML =
+          '<tr><td colspan="9" class="tbl-empty">データ取得に失敗しました</td></tr>';
+      });
+  }
+
+  function renderSalesKpi(t) {
+    document.getElementById('kpi-sales').textContent  = fmt(t.sales);
+    document.getElementById('kpi-gross').textContent  = fmt(t.gross);
+    document.getElementById('kpi-count').textContent  = (t.deal_count || 0) + '件';
+    const rate = t.sales > 0 ? (t.gross / t.sales * 100).toFixed(1) : 0;
+    document.getElementById('kpi-rate').textContent   = rate + '%';
+    window._salesTotal = t.sales;
+    updateGoalBar();
+  }
+
+  function updateGoalBar() {
+    const goal   = parseFloat(document.getElementById('goal-input')?.value) || 15000000;
+    const actual = window._salesTotal || 0;
+    const pct    = Math.min(goal > 0 ? actual / goal * 100 : 0, 100).toFixed(1);
+    const bar    = document.getElementById('goal-bar');
+    if (bar) bar.style.width = pct + '%';
+    const l = document.getElementById('goal-label-left');
+    const p = document.getElementById('goal-label-pct');
+    const r = document.getElementById('goal-label-right');
+    if (l) l.textContent = fmt(actual);
+    if (p) p.textContent = pct + '%';
+    if (r) r.textContent = '目標: ' + fmt(goal);
+  }
+
+  function renderSalesTable(projects) {
+    const tbody = document.getElementById('sales-tbody');
+    if (!projects.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="tbl-empty">案件データがありません</td></tr>';
+      return;
+    }
+    tbody.innerHTML = projects.map(p => `
+      <tr>
+        <td>${p.entry_month || '—'}</td>
+        <td>${esc(p.cl_name)}</td>
+        <td>${esc(p.project_name)}</td>
+        <td class="num">${fmt(p.sales_amount)}</td>
+        <td class="num">${fmt(p.outsource_amount)}</td>
+        <td class="num ${p.gross_profit >= 0 ? 'pos' : 'neg'}">${fmt(p.gross_profit)}</td>
+        <td class="num">${p.gross_profit_rate}%</td>
+        <td><span class="badge badge-${p.status}">${esc(p.status_label)}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-run" style="padding:4px 10px;font-size:.6rem" onclick='editProject(${JSON.stringify(p)})'>編集</button>
+          <button class="btn btn-stop" style="padding:4px 10px;font-size:.6rem;margin-left:4px" onclick="deleteProject(${p.id})">削除</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderChartMonthly(monthly) {
+    const canvas = document.getElementById('chart-monthly');
+    if (!canvas) return;
+    const labels = monthly.map(m => m.month);
+    const sales  = monthly.map(m => m.sales);
+    const gross  = monthly.map(m => m.gross);
+    if (chartMonthly) chartMonthly.destroy();
+    chartMonthly = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: '売上', data: sales, backgroundColor: 'rgba(79,210,255,0.25)', borderColor: '#4fd2ff', borderWidth: 1 },
+          { label: '粗利', data: gross, backgroundColor: 'rgba(0,255,136,0.25)', borderColor: '#00ff88', borderWidth: 1 },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#8899aa', font: { size: 10 } } } },
+        scales: {
+          x: { ticks: { color: '#6677aa', font: { size: 10 } }, grid: { color: 'rgba(79,210,255,0.05)' } },
+          y: { ticks: { color: '#6677aa', font: { size: 10 }, callback: v => '¥' + (v/10000).toFixed(0) + '万' }, grid: { color: 'rgba(79,210,255,0.05)' } },
+        }
+      }
+    });
+  }
+
+  function renderChartStatus(projects) {
+    const canvas = document.getElementById('chart-status');
+    if (!canvas) return;
+    const counts = { negotiating: 0, ordered: 0, in_progress: 0, completed: 0, lost: 0 };
+    projects.forEach(p => { if (counts[p.status] !== undefined) counts[p.status]++; });
+    if (chartStatus) chartStatus.destroy();
+    chartStatus = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['商談中', '受注済', '進行中', '完了', '失注'],
+        datasets: [{
+          data: [counts.negotiating, counts.ordered, counts.in_progress, counts.completed, counts.lost],
+          backgroundColor: ['rgba(79,210,255,0.5)', 'rgba(255,200,0,0.5)', 'rgba(255,128,0,0.5)', 'rgba(0,255,136,0.5)', 'rgba(255,60,60,0.4)'],
+          borderColor:     ['#4fd2ff', '#ffc800', '#ff8c00', '#00ff88', '#ff3c3c'],
+          borderWidth: 1,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#8899aa', font: { size: 10 } }, position: 'right' } },
+      }
+    });
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Modal ────────────────────────────────────
+  function openModal(p = null) {
+    document.getElementById('modal-title').textContent = p ? '案件編集' : '案件追加';
+    document.getElementById('modal-id').value          = p ? p.id : '';
+    document.getElementById('modal-entry-month').value = p ? p.entry_month : '';
+    document.getElementById('modal-status').value      = p ? p.status : 'negotiating';
+    document.getElementById('modal-cl').value          = p ? p.cl_name : '';
+    document.getElementById('modal-project').value     = p ? p.project_name : '';
+    document.getElementById('modal-sales').value       = p ? p.sales_amount : 0;
+    document.getElementById('modal-outsource').value   = p ? p.outsource_amount : 0;
+    document.getElementById('modal-memo').value        = p ? p.memo : '';
+    document.getElementById('sales-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('sales-modal').classList.remove('open');
+  }
+
+  function editProject(p) { openModal(p); }
+
+  function saveProject() {
+    const body = new FormData();
+    const id = document.getElementById('modal-id').value;
+    if (id) body.append('id', id);
+    body.append('entry_month',      document.getElementById('modal-entry-month').value);
+    body.append('status',           document.getElementById('modal-status').value);
+    body.append('cl_name',          document.getElementById('modal-cl').value.trim());
+    body.append('project_name',     document.getElementById('modal-project').value.trim());
+    body.append('sales_amount',     document.getElementById('modal-sales').value);
+    body.append('outsource_amount', document.getElementById('modal-outsource').value);
+    body.append('memo',             document.getElementById('modal-memo').value);
+
+    fetch('/sales/upsert/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF },
+      body,
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.ok) { closeModal(); loadSales(); }
+        else alert('エラー: ' + d.error);
+      });
+  }
+
+  function deleteProject(id) {
+    if (!confirm('この案件を削除しますか？')) return;
+    fetch('/sales/delete/' + id + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF },
+    })
+      .then(r => r.json())
+      .then(d => { if (d.ok) loadSales(); else alert('削除失敗: ' + d.error); });
+  }
+
+  function importCsv(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('csv_file', file);
+    fetch('/sales/import/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF },
+      body: fd,
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.ok) {
+          alert(d.created + '件を取り込みました' + (d.errors.length ? '\nエラー:\n' + d.errors.join('\n') : ''));
+          loadSales();
+        } else {
+          alert('インポートエラー: ' + d.error);
+        }
+        input.value = '';
+      });
+  }
+
+  // モーダル外クリックで閉じる
+  document.getElementById('sales-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
 
   // ── Task progress polling ────────────────────
   {% if task_id %}
