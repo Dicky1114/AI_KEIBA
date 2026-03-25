@@ -18,11 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 from app_folder.views.task_status import task_status, stop_task
 from app_folder.admin import admin_site
 
 # URLの全体設計
 urlpatterns = [
+    # ルートは /accounts/login/ へリダイレクト
+    path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
     # 今回作成するアプリ「app_folder」にアクセスするURL
 	path('accounts/', include('accounts.urls')),
     # path('admin/', admin.site.urls),
