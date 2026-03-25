@@ -1,0 +1,507 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KEIBA AI // CONTROL</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% 30%, #0a0a1e 0%, #000 100%);
+      color: #d0d8e8;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(79,210,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,210,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 20px 24px 60px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(79,210,255,0.18);
+      margin-bottom: 26px;
+    }
+    .logo { font-size: 1.35rem; font-weight: bold; color: #4fd2ff; letter-spacing: 5px; }
+    .logo-sub { font-size: 0.6rem; color: rgba(79,210,255,0.45); letter-spacing: 3px; margin-top: 3px; }
+    .sys-status { font-size: 0.65rem; color: rgba(79,210,255,0.55); letter-spacing: 2px; display: flex; align-items: center; gap: 7px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #00ff99; box-shadow: 0 0 8px #00ff99; flex-shrink: 0; }
+
+    /* ─── MESSAGES ─── */
+    .msg-area { margin-bottom: 20px; }
+    .alert {
+      padding: 9px 14px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+    .alert-success { background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; }
+    .alert-error   { background: rgba(255,60,60,0.08);  border: 1px solid rgba(255,60,60,0.3);  color: #ff6666; }
+    .alert-info    { background: rgba(79,210,255,0.08); border: 1px solid rgba(79,210,255,0.2); color: #4fd2ff; }
+
+    /* ─── STATS ─── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat {
+      background: rgba(79,210,255,0.04);
+      border: 1px solid rgba(79,210,255,0.16);
+      border-radius: 8px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:#4fd2ff; opacity:0.7; }
+    .stat-lbl { font-size: 0.6rem; color: rgba(79,210,255,0.55); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-val { font-size: 1.55rem; font-weight: bold; color: #fff; }
+    .pos { color: #00ff88; }
+    .neg { color: #ff5555; }
+
+    /* ─── TABS ─── */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(79,210,255,0.14);
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: rgba(79,210,255,0.4);
+      font-family: inherit;
+      font-size: 0.72rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 9px 22px;
+      cursor: pointer;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-btn:hover { color: rgba(79,210,255,0.85); }
+    .tab-btn.active { color: #4fd2ff; border-bottom-color: #4fd2ff; }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ─── STEP GRID ─── */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .card {
+      background: rgba(6,6,20,0.85);
+      border: 1px solid rgba(79,210,255,0.12);
+      border-radius: 8px;
+      padding: 22px 24px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(79,210,255,0.28); }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 18px;
+    }
+    .step-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(79,210,255,0.35);
+      background: rgba(79,210,255,0.1);
+      color: #4fd2ff;
+      font-size: 0.7rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-title { font-size: 0.82rem; color: #c8d8e8; letter-spacing: 1px; }
+
+    /* ─── FORM ELEMENTS ─── */
+    .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .fld { display: flex; flex-direction: column; gap: 4px; }
+    .fld label { font-size: 0.58rem; color: rgba(79,210,255,0.5); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    input[type="date"] {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(79,210,255,0.18);
+      border-radius: 4px;
+      color: #d0d8e8;
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="date"]:focus { border-color: rgba(79,210,255,0.55); }
+
+    .btn {
+      padding: 7px 18px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-run  { background: rgba(79,210,255,0.12); border: 1px solid rgba(79,210,255,0.45); color: #4fd2ff; }
+    .btn-run:hover { background: rgba(79,210,255,0.22); border-color: #4fd2ff; }
+    .btn-stop { background: rgba(255,60,60,0.09); border: 1px solid rgba(255,60,60,0.35); color: #ff6060; }
+    .btn-stop:hover:not(:disabled) { background: rgba(255,60,60,0.18); }
+    .btn-csv  { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.4); color: #00ff88; }
+    .btn-csv:hover { background: rgba(0,255,136,0.2); border-color: #00ff88; }
+    .btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+    /* ─── PROGRESS ─── */
+    .prog-wrap { margin-top: 13px; }
+    .prog-track {
+      height: 5px;
+      background: rgba(79,210,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+    .prog-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4fd2ff 0%, #00ff88 100%);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 6px rgba(79,210,255,0.6);
+    }
+    .prog-txt { font-size: 0.6rem; color: rgba(79,210,255,0.5); letter-spacing: 1px; }
+
+    /* ─── TRAIN TAB ─── */
+    .train-top { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 22px; }
+    .cb-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .cb-col {
+      background: rgba(6,6,20,0.85);
+      border: 1px solid rgba(79,210,255,0.12);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+    .cb-col h3 {
+      font-size: 0.62rem;
+      color: #4fd2ff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 11px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(79,210,255,0.15);
+    }
+    /* Django が生成するチェックボックスリストのスタイル上書き */
+    .cb-col ul { list-style: none; }
+    .cb-col li { margin-bottom: 5px; display: flex; align-items: flex-start; gap: 6px; }
+    .cb-col label { font-size: 0.62rem; color: rgba(200,216,232,0.75); letter-spacing: 0; cursor: pointer; text-transform: none; line-height: 1.4; }
+    .cb-col input[type="checkbox"] { accent-color: #4fd2ff; margin-top: 2px; flex-shrink: 0; }
+
+    /* ─── PREDICT PLACEHOLDER ─── */
+    .placeholder {
+      text-align: center;
+      padding: 80px 40px;
+      color: rgba(79,210,255,0.28);
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      line-height: 2.2;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(79,210,255,0.25); border-radius: 3px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .step-grid { grid-template-columns: 1fr; }
+      .cb-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 500px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .cb-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div>
+      <div class="logo">KEIBA AI</div>
+      <div class="logo-sub">AUTONOMOUS PREDICTION SYSTEM</div>
+    </div>
+    <div class="sys-status"><span class="dot"></span>SYSTEM ONLINE</div>
+  </header>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+  <div class="msg-area">
+    {% for msg in messages %}
+    <div class="alert alert-{% if msg.tags == 'error' %}error{% elif msg.tags == 'success' %}success{% else %}info{% endif %}">
+      {{ msg }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">掛金</div>
+      <div class="stat-val">¥1,002,000</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">回収金額</div>
+      <div class="stat-val pos">¥1,234,000</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">回収率</div>
+      <div class="stat-val pos">122<span style="font-size:.9rem">%</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">勝率</div>
+      <div class="stat-val">48<span style="font-size:.9rem">%</span></div>
+    </div>
+  </div>
+
+  <!-- TAB NAV -->
+  <div class="tabs">
+    <button class="tab-btn{% if active_tab == 'data' or not active_tab %} active{% endif %}" onclick="showTab('data',this)">データ取得</button>
+    <button class="tab-btn{% if active_tab == 'train' %} active{% endif %}" onclick="showTab('train',this)">学習 / CSV出力</button>
+    <button class="tab-btn{% if active_tab == 'predict' %} active{% endif %}" onclick="showTab('predict',this)">予測・分析</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TAB: データ取得
+  ════════════════════════════════════════ -->
+  <div id="pane-data" class="tab-pane{% if active_tab == 'data' or not active_tab %} active{% endif %}">
+    <div class="step-grid">
+
+      <!-- 1. レース情報 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="step-num">1</div>
+          <div class="card-title">レース情報（URL・レース・結果）</div>
+        </div>
+        <form method="POST" action="/?action=race" id="form-race">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="fld">
+              <label>開始日付</label>
+              <input type="date" name="start_date" value="{{ today_minus30 }}" required>
+            </div>
+            <div class="fld">
+              <label>終了日付</label>
+              <input type="date" name="end_date" value="{{ today }}" required>
+            </div>
+            <button type="submit" class="btn btn-run" id="race-exec-btn">実行</button>
+            <button type="button" class="btn btn-stop" id="race-stop-btn" disabled>停止</button>
+          </div>
+        </form>
+        <div class="prog-wrap" id="race-prog" {% if not task_id %}style="display:none"{% endif %}>
+          <div class="prog-track"><div class="prog-bar" id="prog-bar-race"></div></div>
+          <div class="prog-txt" id="prog-txt-race">待機中…</div>
+        </div>
+      </div>
+
+      <!-- 2. 馬のレース履歴 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="step-num">2</div>
+          <div class="card-title">馬のレース履歴</div>
+        </div>
+        <form method="POST" action="/?action=horse" id="form-horse">
+          {% csrf_token %}
+          <div class="form-row">
+            <button type="submit" class="btn btn-run">実行</button>
+          </div>
+        </form>
+        <div class="prog-wrap" style="display:none" id="horse-prog">
+          <div class="prog-track"><div class="prog-bar" id="prog-bar-horse"></div></div>
+          <div class="prog-txt" id="prog-txt-horse">待機中…</div>
+        </div>
+      </div>
+
+      <!-- 3. 騎手のレース履歴 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="step-num">3</div>
+          <div class="card-title">騎手のレース履歴</div>
+        </div>
+        <form method="POST" action="/?action=jockey" id="form-jockey">
+          {% csrf_token %}
+          <div class="form-row">
+            <button type="submit" class="btn btn-run">実行</button>
+          </div>
+        </form>
+        <div class="prog-wrap" style="display:none" id="jockey-prog">
+          <div class="prog-track"><div class="prog-bar" id="prog-bar-jockey"></div></div>
+          <div class="prog-txt" id="prog-txt-jockey">待機中…</div>
+        </div>
+      </div>
+
+      <!-- 4. トレーニングデータ更新 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="step-num">4</div>
+          <div class="card-title">トレーニングデータ更新</div>
+        </div>
+        <form method="POST" action="/?action=apply" id="form-apply">
+          {% csrf_token %}
+          <div class="form-row">
+            <button type="submit" class="btn btn-run">実行</button>
+          </div>
+        </form>
+      </div>
+
+    </div><!-- /step-grid -->
+  </div><!-- /pane-data -->
+
+  <!-- ═══════════════════════════════════════
+       TAB: 学習 / CSV出力
+  ════════════════════════════════════════ -->
+  <div id="pane-train" class="tab-pane{% if active_tab == 'train' %} active{% endif %}">
+    <form method="POST" action="/?action=train" id="form-train">
+      {% csrf_token %}
+      <div class="train-top">
+        <div class="fld">
+          <label>開始日付</label>
+          {{ train_form.start_date }}
+        </div>
+        <div class="fld">
+          <label>終了日付</label>
+          {{ train_form.end_date }}
+        </div>
+        <button type="submit" class="btn btn-csv">CSV 出力</button>
+        <button type="button" class="btn btn-run" onclick="toggleAll(true)">全選択</button>
+        <button type="button" class="btn btn-stop" onclick="toggleAll(false)">全解除</button>
+      </div>
+
+      <div class="cb-grid">
+        <div class="cb-col">
+          <h3>レース基本情報</h3>
+          {{ train_form.race_basic }}
+        </div>
+        <div class="cb-col">
+          <h3>過去馬情報</h3>
+          {{ train_form.past_horse }}
+        </div>
+        <div class="cb-col">
+          <h3>過去騎手情報</h3>
+          {{ train_form.past_jockey }}
+        </div>
+        <div class="cb-col">
+          <h3>結果情報</h3>
+          {{ train_form.result_info }}
+        </div>
+      </div>
+    </form>
+  </div><!-- /pane-train -->
+
+  <!-- ═══════════════════════════════════════
+       TAB: 予測・分析
+  ════════════════════════════════════════ -->
+  <div id="pane-predict" class="tab-pane{% if active_tab == 'predict' %} active{% endif %}">
+    <div class="placeholder">
+      PREDICTION ENGINE<br>
+      ─────────────────────<br>
+      COMING SOON<br>
+      <span style="font-size:.6rem; opacity:.6">予測・分析機能は準備中です</span>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+  // ── Tab switch ──────────────────────────────
+  function showTab(name, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Toggle checkboxes ───────────────────────
+  function toggleAll(v) {
+    document.querySelectorAll('#form-train input[type="checkbox"]').forEach(c => c.checked = v);
+  }
+
+  // ── Task progress polling ────────────────────
+  {% if task_id %}
+  (function() {
+    const taskId = "{{ task_id }}";
+    const barEl  = document.getElementById('prog-bar-race');
+    const txtEl  = document.getElementById('prog-txt-race');
+    const wrapEl = document.getElementById('race-prog');
+
+    if (wrapEl) wrapEl.style.display = 'block';
+
+    function poll() {
+      fetch('/chesck_task_status/' + taskId + '/')
+        .then(r => r.json())
+        .then(data => {
+          const state = data.state || '';
+          // celery-progress 形式 or 独自形式に対応
+          const details = data.details || {};
+          const current = details.current || data.progress || data.current || 0;
+          const total   = details.total   || data.total   || 100;
+          const pct     = total > 0 ? Math.min(Math.round(current / total * 100), 100) : 0;
+
+          if (barEl) barEl.style.width = pct + '%';
+          if (txtEl) txtEl.textContent = state + '  ' + current + ' / ' + total + '  (' + pct + '%)';
+
+          if (state === 'SUCCESS') {
+            if (barEl) { barEl.style.width = '100%'; barEl.style.background = '#00ff88'; }
+            if (txtEl) txtEl.textContent = '✓ 完了';
+          } else if (state === 'FAILURE') {
+            if (barEl) barEl.style.background = '#ff5555';
+            if (txtEl) txtEl.textContent = '✗ エラー';
+          } else {
+            setTimeout(poll, 3000);
+          }
+        })
+        .catch(() => setTimeout(poll, 5000));
+    }
+
+    poll();
+  })();
+  {% endif %}
+</script>
+</body>
+</html>

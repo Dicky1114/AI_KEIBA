@@ -18,18 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
 from app_folder.views.task_status import task_status, stop_task
 from app_folder.admin import admin_site
+from app_folder.views.main_view import main_view
 
 # URLの全体設計
 urlpatterns = [
-    # ルートは /accounts/login/ へリダイレクト
-    path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
-    # 今回作成するアプリ「app_folder」にアクセスするURL
-	path('accounts/', include('accounts.urls')),
-    # path('admin/', admin.site.urls),
-    path('admin/', admin_site.urls), 
+    # ルート → 統合ダッシュボード（認証不要）
+    path('', main_view, name='main'),
+    # 管理画面（データ管理用）
+    path('admin/', admin_site.urls),
+    # Celery タスク状態確認・停止
     path("chesck_task_status/<str:task_id>/", task_status, name="task_status"),
     path('stop_task/<uuid:task_id>/', stop_task, name='stop_task'),
 ]
