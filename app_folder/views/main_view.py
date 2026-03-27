@@ -18,7 +18,7 @@ from ..forms import GetDataForm, TrainForm
 from ..models import URLMst, CompareView, CreateRaceIDsView, TrainingInfo
 from ..services.get_raceid import GetRaceID
 from ..services.insert_db import insert_url_db
-from ..services.tasks import create_horse_task, create_base_task, create_jockey_task
+from ..services.tasks import create_horse_task, create_jockey_task, create_race_task
 from ..utils.zip import unzip_files, zip_files
 from ..utils.messages import info_messages, err_messages
 
@@ -66,74 +66,13 @@ class MainView(View):
                 messages.error(request, "日付を正しく入力してください。")
                 return render(request, "main.html", base_context)
 
-            start_date = form.cleaned_data["start_date"]
-            end_date = form.cleaned_data["end_date"]
-
             try:
-                from selenium import webdriver
-                from selenium.webdriver.chrome.options import Options
-
-                _ensure_media_dirs()
-                zip_folder = settings.MEDIA_ROOT
-
-                # ZIP 解凍
-                cnt_ym = len([f for f in os.listdir(f"{settings.MEDIA_ROOT}/calendar_yyyymm") if f.endswith(".zip")])
-                cnt_ymd = len([f for f in os.listdir(f"{settings.MEDIA_ROOT}/calendar_yyyymmdd") if f.endswith(".zip")])
-                if cnt_ym > 0:
-                    unzip_files(None, zip_folder, "calendar_yyyymm", "")
-                if cnt_ymd > 0:
-                    unzip_files(None, zip_folder, "calendar_yyyymmdd", "")
-
-                # Chrome ドライバ（この処理のみで使用）
-                opts = Options()
-                opts.add_argument("--headless")
-                opts.add_argument("--no-sandbox")
-                opts.add_argument("--disable-dev-shm-usage")
-                driver = webdriver.Chrome(options=opts)
-
-                # レース URL 取得
-                race_service = GetRaceID()
-                url_list, race_id_list, dates_list = race_service.create_url_list(start_date, end_date, driver)
-
-                if url_list == "sys_err":
-                    messages.error(request, "URL取得に失敗しました。")
-                    driver.quit()
-                    return render(request, "main.html", base_context)
-
-                url_df = pd.DataFrame({
-                    "race_id": race_id_list,
-                    "race_date": dates_list,
-                    "url": url_list,
-                }).drop_duplicates(subset=["race_id", "race_date", "url"]).sort_values("race_date").reset_index(drop=True)
-
-                if insert_url_db(url_df, SYSTEM_USER) == "sys_err":
-                    messages.error(request, "URL登録に失敗しました。")
-                    driver.quit()
-                    return render(request, "main.html", base_context)
-
-                url_race_id_pairs = URLMst.objects.exclude(
-                    race_id__in=CompareView.objects.values("race_id")
-                ).order_by("race_id").values_list("url", "race_id")
-
-                race_id_url_pairs = CreateRaceIDsView.objects.exclude(
-                    race_id__in=["202404030612", "202408060108"]
-                ).values_list("url", "race_id")
-
-                combined = sorted(
-                    list(url_race_id_pairs) + list(race_id_url_pairs),
-                    key=lambda x: x[1]
+                start_date = form.cleaned_data["start_date"]
+                end_date = form.cleaned_data["end_date"]
+                task = create_race_task.apply_async(
+                    args=[SYSTEM_USER, start_date.isoformat(), end_date.isoformat()],
+                    countdown=1,
                 )
-
-                driver.quit()
-
-                # ZIP 圧縮（後処理）
-                for folder_name in ["calendar_yyyymm", "calendar_yyyymmdd", "base", "odds"]:
-                    folder_path = f"{settings.MEDIA_ROOT}/{folder_name}"
-                    if os.path.isdir(folder_path) and any(p.is_file() for p in __import__("pathlib").Path(folder_path).iterdir()):
-                        if len([f for f in os.listdir(folder_path) if f.endswith(".html")]) > 0:
-                            zip_files(zip_folder, folder_name)
-
-                task = create_base_task.apply_async(args=[SYSTEM_USER, combined], countdown=5)
                 base_context["task_id"] = task.id
                 messages.success(request, "レーススクレイピングを開始しました。")
 

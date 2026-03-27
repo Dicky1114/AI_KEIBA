@@ -16,8 +16,59 @@ services:
           name: ai-keiba-db
           property: connectionString
       - key: REDIS_URL
-        sync: false
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
     autoDeploy: true
+
+  - type: worker
+    name: ai-keiba-worker
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "celery -A app_config worker --loglevel=info -Q base_queue,horse_queue,jockey_queue"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: app_config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-keiba-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: keyvalue
+          name: ai-keiba-redis
+          property: connectionString
+    autoDeploy: true
+
+  - type: keyvalue
+    name: ai-keiba-redis
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
 
 databases:
   - name: ai-keiba-db
