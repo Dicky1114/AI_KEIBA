@@ -1,6 +1,11 @@
 from datetime import date
+import json
 import os
 import random
+from pathlib import Path
+import threading
+import traceback
+import uuid
 
 import pandas as pd
 import redis
@@ -20,6 +25,25 @@ from ..services.get_result import result
 from ..services.insert_db import insert_base_db, insert_result_db, insert_url_db
 from ..utils.zip import name_change, unzip_files, zip_files
 
+
+class LocalAsyncResult:
+    def __init__(self, task_id):
+        self.id = task_id
+
+
+class _LocalTaskRequest:
+    def __init__(self, task_id):
+        self.id = task_id
+
+
+class LocalTaskContext:
+    def __init__(self, task_id):
+        self.request = _LocalTaskRequest(task_id)
+
+    def update_state(self, state=None, meta=None):
+        write_local_task_state(self.request.id, state=state or "PROGRESS", details=meta or {})
+
+
 def set_user_agent(driver, user_agent):
     """ブラウザのUser-Agentを変更する"""
     driver.execute_cdp_cmd("Network.setUserAgentOverride", {
@@ -37,6 +61,90 @@ def get_redis_client():
     if not redis_url:
         return None
     return redis.Redis.from_url(redis_url, socket_connect_timeout=1, socket_timeout=1)
+
+
+def get_local_task_dir():
+    task_dir = Path(settings.MEDIA_ROOT) / "_task_state"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    return task_dir
+
+
+def get_local_task_state_path(task_id):
+    return get_local_task_dir() / f"{task_id}.json"
+
+
+def get_local_task_stop_path(task_id):
+    return get_local_task_dir() / f"{task_id}.stop"
+
+
+def write_local_task_state(task_id, state, result=None, details=None):
+    details = details or {}
+    payload = {
+        "task_id": task_id,
+        "state": state,
+        "status": state,
+        "result": result,
+        "details": details,
+        "current": details.get("current", 0),
+        "total": details.get("total", 0),
+        "progress": details.get("current", 0),
+    }
+    get_local_task_state_path(task_id).write_text(
+        json.dumps(payload, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return payload
+
+
+def read_local_task_state(task_id):
+    state_path = get_local_task_state_path(task_id)
+    if not state_path.exists():
+        return None
+    try:
+        return json.loads(state_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def local_task_exists(task_id):
+    return get_local_task_state_path(task_id).exists()
+
+
+def set_local_task_stop(task_id):
+    get_local_task_stop_path(task_id).write_text("1", encoding="utf-8")
+
+
+def is_local_task_stopped(task_id):
+    return get_local_task_stop_path(task_id).exists()
+
+
+def clear_local_task_stop(task_id):
+    stop_path = get_local_task_stop_path(task_id)
+    if stop_path.exists():
+        stop_path.unlink()
+
+
+def start_local_task(task_name, target, *args):
+    task_id = f"local-{task_name}-{uuid.uuid4()}"
+    write_local_task_state(task_id, "PENDING")
+
+    def runner():
+        try:
+            write_local_task_state(task_id, "STARTED")
+            result = target(task_id, *args)
+            write_local_task_state(task_id, "SUCCESS", result=result or "完了")
+        except Exception as exc:
+            write_local_task_state(
+                task_id,
+                "FAILURE",
+                result=str(exc),
+                details={"traceback": traceback.format_exc()},
+            )
+        finally:
+            clear_local_task_stop(task_id)
+
+    threading.Thread(target=runner, daemon=True, name=f"ai-keiba-{task_name}-{task_id}").start()
+    return LocalAsyncResult(task_id)
 
 
 def ensure_media_dirs():
@@ -111,12 +219,17 @@ def run_base_scrape(task, username, url_race_id_pairs):
     progress_recorder = ProgressRecorder(task)
     zip_folder = settings.MEDIA_ROOT
     year = None
+    task_id = getattr(getattr(task, "request", None), "id", None)
     driver = create_chrome_driver()
 
     try:
         total = len(url_race_id_pairs)
         for i, (url, race_id) in enumerate(url_race_id_pairs):
-            if redis_client and redis_client.get(f"stop:{task.request.id}"):
+            if (
+                task_id
+                and redis_client
+                and redis_client.get(f"stop:{task_id}")
+            ) or (task_id and is_local_task_stopped(task_id)):
                 maybe_zip("base")
                 maybe_zip("odds")
                 return "停止しました。"
@@ -228,3 +341,52 @@ def create_jockey_task(username):
         print(e)
     finally:
         zip_files(zip_folder, "jockey") 
+
+
+def run_local_race_task(task_id, username, start_date_iso, end_date_iso):
+    task = LocalTaskContext(task_id)
+    start_date = date.fromisoformat(start_date_iso)
+    end_date = date.fromisoformat(end_date_iso)
+    pending_pairs = build_pending_race_pairs(start_date, end_date, username)
+    return run_base_scrape(task, username, pending_pairs)
+
+
+def run_local_horse_task(task_id, username):
+    task = LocalTaskContext(task_id)
+    ensure_media_dirs()
+    maybe_unzip("horse", target="horse")
+    horse_data(task, "html_content", username, "horse")
+    maybe_zip("horse")
+    return "完了"
+
+
+def run_local_jockey_task(task_id, username):
+    ensure_media_dirs()
+    maybe_unzip("jockey", target="jockey")
+    jockey_data("html_content", username, "jockey")
+    maybe_zip("jockey")
+    return "完了"
+
+
+def dispatch_race_task(username, start_date_iso, end_date_iso):
+    try:
+        return create_race_task.apply_async(
+            args=[username, start_date_iso, end_date_iso],
+            countdown=1,
+        )
+    except Exception:
+        return start_local_task("race", run_local_race_task, username, start_date_iso, end_date_iso)
+
+
+def dispatch_horse_task(username):
+    try:
+        return create_horse_task.apply_async(args=[username], countdown=5)
+    except Exception:
+        return start_local_task("horse", run_local_horse_task, username)
+
+
+def dispatch_jockey_task(username):
+    try:
+        return create_jockey_task.apply_async(args=[username], countdown=5)
+    except Exception:
+        return start_local_task("jockey", run_local_jockey_task, username)

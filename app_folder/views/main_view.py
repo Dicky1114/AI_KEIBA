@@ -18,7 +18,7 @@ from ..forms import GetDataForm, TrainForm
 from ..models import URLMst, CompareView, CreateRaceIDsView, TrainingInfo
 from ..services.get_raceid import GetRaceID
 from ..services.insert_db import insert_url_db
-from ..services.tasks import create_horse_task, create_jockey_task, create_race_task
+from ..services.tasks import dispatch_horse_task, dispatch_jockey_task, dispatch_race_task
 from ..utils.zip import unzip_files, zip_files
 from ..utils.messages import info_messages, err_messages
 
@@ -69,10 +69,7 @@ class MainView(View):
             try:
                 start_date = form.cleaned_data["start_date"]
                 end_date = form.cleaned_data["end_date"]
-                task = create_race_task.apply_async(
-                    args=[SYSTEM_USER, start_date.isoformat(), end_date.isoformat()],
-                    countdown=1,
-                )
+                task = dispatch_race_task(SYSTEM_USER, start_date.isoformat(), end_date.isoformat())
                 base_context["task_id"] = task.id
                 messages.success(request, "レーススクレイピングを開始しました。")
 
@@ -88,7 +85,7 @@ class MainView(View):
             try:
                 _ensure_media_dirs()
                 unzip_files(None, settings.MEDIA_ROOT, "horse", "horse")
-                task = create_horse_task.apply_async(args=[SYSTEM_USER], countdown=5)
+                task = dispatch_horse_task(SYSTEM_USER)
                 base_context["task_id"] = task.id
                 messages.success(request, "馬のレース履歴スクレイピングを開始しました。")
             except Exception as e:
@@ -102,7 +99,7 @@ class MainView(View):
             try:
                 _ensure_media_dirs()
                 unzip_files(None, settings.MEDIA_ROOT, "jockey", "jockey")
-                task = create_jockey_task.apply_async(args=[SYSTEM_USER], countdown=5)
+                task = dispatch_jockey_task(SYSTEM_USER)
                 base_context["task_id"] = task.id
                 messages.success(request, "騎手のレース履歴スクレイピングを開始しました。")
             except Exception as e:
