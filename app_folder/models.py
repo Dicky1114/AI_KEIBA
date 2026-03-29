@@ -1108,4 +1108,64 @@ class SalesProject(models.Model):
 
     def __str__(self):
         return f"{self.cl_name} - {self.project_name}"
+
+
+# ─── 馬券記録・シミュレーション ───────────────────────────────────────────────
+class BettingRecord(models.Model):
+    """
+    馬券購入記録モデル。実購入とシミュレーション両方に対応。
+    """
+    class Meta:
+        db_table = 't_betting_record'
+        ordering = ['-race_date', '-created_at']
+        verbose_name = "馬券記録"
+        verbose_name_plural = "馬券記録一覧"
+
+    BET_TYPE_CHOICES = [
+        ('win',       '単勝'),
+        ('place',     '複勝'),
+        ('quinella',  '馬連'),
+        ('exacta',    '馬単'),
+        ('wide',      'ワイド'),
+        ('trio',      '3連複'),
+        ('trifecta',  '3連単'),
+    ]
+
+    id            = models.AutoField(primary_key=True)
+    race_id       = models.CharField(max_length=12, db_comment="レースID")
+    race_date     = models.DateField(db_comment="レース日付")
+    race_place    = models.CharField(max_length=20, null=True, blank=True, db_comment="開催場所")
+    race_name     = models.CharField(max_length=100, null=True, blank=True, db_comment="レース名")
+    race_number   = models.SmallIntegerField(null=True, blank=True, db_comment="レース番号")
+
+    # 馬券情報
+    bet_type      = models.CharField(max_length=20, choices=BET_TYPE_CHOICES, db_comment="馬券種別")
+    combination   = models.CharField(max_length=30, db_comment="組み合わせ（例: 3-7, 1-2-5）")
+    bet_amount    = models.IntegerField(default=100, db_comment="購入金額（円）")
+    odds          = models.FloatField(null=True, blank=True, db_comment="オッズ")
+
+    # 結果（nullは未確定）
+    is_win        = models.BooleanField(null=True, blank=True, db_comment="的中フラグ")
+    payout        = models.IntegerField(default=0, db_comment="払い戻し金額（円）")
+    profit        = models.IntegerField(default=0, db_comment="損益（payout - bet_amount）")
+
+    # 予測情報（モデルからの予測）
+    predicted_rank_1   = models.SmallIntegerField(null=True, blank=True, db_comment="予測1着馬番")
+    predicted_rank_2   = models.SmallIntegerField(null=True, blank=True, db_comment="予測2着馬番")
+    predicted_rank_3   = models.SmallIntegerField(null=True, blank=True, db_comment="予測3着馬番")
+    model_version      = models.CharField(max_length=50, null=True, blank=True, db_comment="使用モデルバージョン")
+
+    # シミュレーション
+    is_simulation = models.BooleanField(default=False, db_comment="シミュレーションフラグ")
+    memo          = models.TextField(blank=True, default='', db_comment="メモ")
+
+    created_at    = models.DateTimeField(auto_now_add=True)
+    updated_at    = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.profit = self.payout - self.bet_amount
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.race_date} {self.race_id} {self.get_bet_type_display()} {self.combination}"
 # endregion

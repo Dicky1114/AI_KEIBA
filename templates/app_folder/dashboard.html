@@ -1,36 +1,406 @@
 {% extends "base.html" %}
 {% load static %}
 
-
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+  <style>
+    .stat-cards { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: rgba(0,0,0,0.6); border-radius: 1rem; padding: 1.2rem 1.5rem;
+      min-width: 160px; flex: 1; text-align: center; color: #fff;
+    }
+    .stat-card h4 { font-size: 0.85rem; opacity: 0.7; margin-bottom: 0.3rem; }
+    .stat-card .value { font-size: 1.6rem; font-weight: bold; }
+    .stat-card .value.positive { color: #4ade80; }
+    .stat-card .value.negative { color: #f87171; }
+
+    .section-title { color: #fff; font-size: 1.1rem; margin: 1.5rem 0 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.4rem; }
+
+    .chart-area { background: rgba(0,0,0,0.4); border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; max-width: 700px; }
+
+    .records-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 0.85rem; }
+    .records-table th { background: rgba(255,255,255,0.1); padding: 0.5rem; text-align: left; }
+    .records-table td { padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .records-table .win { color: #4ade80; font-weight: bold; }
+    .records-table .lose { color: #f87171; }
+
+    .sim-form { background: rgba(0,0,0,0.5); border-radius: 1rem; padding: 1.2rem; margin-bottom: 1.5rem; }
+    .sim-form .form-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; margin-bottom: 0.5rem; }
+    .sim-form label { color: rgba(255,255,255,0.7); font-size: 0.75rem; display: block; margin-bottom: 0.2rem; }
+    .sim-form input, .sim-form select {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; border-radius: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.85rem;
+    }
+    .sim-form input:focus, .sim-form select:focus { outline: none; border-color: #60a5fa; }
+    .sim-form button {
+      background: #3b82f6; color: #fff; border: none; border-radius: 0.5rem;
+      padding: 0.5rem 1.2rem; cursor: pointer; font-size: 0.85rem;
+    }
+    .sim-form button:hover { background: #2563eb; }
+    .sim-result { margin-top: 0.8rem; padding: 0.6rem; border-radius: 0.5rem; display: none; }
+    .sim-result.show { display: block; }
+
+    .badge-sim { background: #f59e0b; color: #000; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 0.3rem; }
+    .badge-real { background: #10b981; color: #000; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 0.3rem; }
+
+    .tab-btns { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .tab-btn {
+      background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 0.4rem 1rem;
+      border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem;
+    }
+    .tab-btn.active { background: #3b82f6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
 {% endblock %}
 
 {% block extra_title %}
-  <title>DashBoard</title>
+  <title>DashBoard - AI_KEIBA</title>
 {% endblock %}
 
 {% block extra_nav_title %}
-  <a class="Nav-link" href="/horse/dashboard">DashBoard</a>
+  <a class="Nav-link" href="/">DashBoard</a>
 {% endblock %}
 
 {% block content %}
-    <div class="frame">
-      <h3>掛金</h3>
-      <p>1,002,000円</p>
+  <!-- ========== 累計サマリー ========== -->
+  <h3 class="section-title">累計成績</h3>
+  <div class="stat-cards">
+    <div class="stat-card">
+      <h4>掛金</h4>
+      <div class="value">{{ stats_all.total_bet|default:"0" | floatformat:0 }}円</div>
     </div>
-    <div class="frame">
-      <h3>回収金額</h3>
-      <p>1,234,000円</p>
+    <div class="stat-card">
+      <h4>回収金額</h4>
+      <div class="value">{{ stats_all.total_payout|default:"0" | floatformat:0 }}円</div>
     </div>
-    <div class="frame">
-      <h3>回収率</h3>
-      <p>122%</p>
+    <div class="stat-card">
+      <h4>回収率</h4>
+      <div class="value {% if stats_all.roi >= 100 %}positive{% else %}negative{% endif %}">
+        {{ stats_all.roi|default:"0" }}%
+      </div>
     </div>
-    <div class="frame">
-      <h3>勝率</h3>
-      <p>48%</p>
+    <div class="stat-card">
+      <h4>勝率</h4>
+      <div class="value">{{ stats_all.win_rate|default:"0" }}%</div>
     </div>
-    
+    <div class="stat-card">
+      <h4>損益</h4>
+      <div class="value {% if stats_all.total_profit >= 0 %}positive{% else %}negative{% endif %}">
+        {{ stats_all.total_profit|default:"0" | floatformat:0 }}円
+      </div>
+    </div>
+    <div class="stat-card">
+      <h4>学習データ数</h4>
+      <div class="value">{{ training_count|default:"0" }}</div>
+    </div>
+  </div>
 
+  <!-- ========== 直近30日 ========== -->
+  <h3 class="section-title">直近30日</h3>
+  <div class="stat-cards">
+    <div class="stat-card">
+      <h4>掛金</h4>
+      <div class="value">{{ stats_recent.total_bet|default:"0" | floatformat:0 }}円</div>
+    </div>
+    <div class="stat-card">
+      <h4>回収率</h4>
+      <div class="value {% if stats_recent.roi >= 100 %}positive{% else %}negative{% endif %}">
+        {{ stats_recent.roi|default:"0" }}%
+      </div>
+    </div>
+    <div class="stat-card">
+      <h4>勝率</h4>
+      <div class="value">{{ stats_recent.win_rate|default:"0" }}%</div>
+    </div>
+    <div class="stat-card">
+      <h4>損益</h4>
+      <div class="value {% if stats_recent.total_profit >= 0 %}positive{% else %}negative{% endif %}">
+        {{ stats_recent.total_profit|default:"0" | floatformat:0 }}円
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 月次チャート ========== -->
+  <h3 class="section-title">月次推移</h3>
+  <div class="chart-area">
+    <canvas id="monthlyChart" height="200"></canvas>
+  </div>
+
+  <!-- ========== タブ切替 ========== -->
+  <div class="tab-btns">
+    <button class="tab-btn active" data-tab="records">直近記録</button>
+    <button class="tab-btn" data-tab="simulate">シミュレーション</button>
+    <button class="tab-btn" data-tab="bet-input">馬券登録</button>
+  </div>
+
+  <!-- ===== 直近記録タブ ===== -->
+  <div id="tab-records" class="tab-content active">
+    <table class="records-table">
+      <thead>
+        <tr>
+          <th>日付</th><th>レース</th><th>馬券</th><th>組合せ</th>
+          <th>掛金</th><th>払戻</th><th>損益</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recent_records %}
+        <tr>
+          <td>{{ r.race_date|date:"m/d" }}</td>
+          <td>{{ r.race_place|default:"-" }} {{ r.race_number|default:"" }}R</td>
+          <td>{{ r.get_bet_type_display }}</td>
+          <td>{{ r.combination }}</td>
+          <td>{{ r.bet_amount }}円</td>
+          <td>{{ r.payout }}円</td>
+          <td class="{% if r.profit >= 0 %}win{% else %}lose{% endif %}">
+            {{ r.profit }}円
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center; opacity:0.5;">記録がありません</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== シミュレーションタブ ===== -->
+  <div id="tab-simulate" class="tab-content">
+    <div class="sim-form">
+      <h4 style="color:#fff; margin-bottom:0.8rem;">馬券シミュレーション</h4>
+      <div class="form-row">
+        <div>
+          <label>レースID</label>
+          <input type="text" id="sim-race-id" placeholder="202603050101" style="width:130px;">
+        </div>
+        <div>
+          <label>日付</label>
+          <input type="date" id="sim-race-date">
+        </div>
+        <div>
+          <label>場所</label>
+          <input type="text" id="sim-race-place" placeholder="中山" style="width:80px;">
+        </div>
+        <div>
+          <label>レース名</label>
+          <input type="text" id="sim-race-name" placeholder="レース名" style="width:120px;">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>馬券種別</label>
+          <select id="sim-bet-type">
+            {% for value, label in bet_type_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>組合せ</label>
+          <input type="text" id="sim-combination" placeholder="3-7" style="width:100px;">
+        </div>
+        <div>
+          <label>掛金(円)</label>
+          <input type="number" id="sim-bet-amount" value="100" style="width:90px;">
+        </div>
+        <div>
+          <label>オッズ</label>
+          <input type="number" id="sim-odds" step="0.1" placeholder="0.0" style="width:80px;">
+        </div>
+        <div>
+          <label>的中</label>
+          <select id="sim-is-win">
+            <option value="">未確定</option>
+            <option value="true">的中</option>
+            <option value="false">外れ</option>
+          </select>
+        </div>
+        <div>
+          <label>払戻(円)</label>
+          <input type="number" id="sim-payout" value="0" style="width:90px;">
+        </div>
+        <button onclick="submitSimulation()">登録</button>
+      </div>
+      <div id="sim-result" class="sim-result"></div>
+    </div>
+
+    <!-- シミュレーション集計 -->
+    <div id="sim-stats" class="stat-cards" style="margin-top:1rem;"></div>
+    <table class="records-table" id="sim-table">
+      <thead>
+        <tr><th>日付</th><th>馬券</th><th>組合せ</th><th>掛金</th><th>払戻</th><th>損益</th></tr>
+      </thead>
+      <tbody id="sim-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ===== 馬券登録タブ ===== -->
+  <div id="tab-bet-input" class="tab-content">
+    <div class="sim-form">
+      <h4 style="color:#fff; margin-bottom:0.8rem;">実際の馬券登録</h4>
+      <div class="form-row">
+        <div>
+          <label>レースID</label>
+          <input type="text" id="bet-race-id" placeholder="202603050101" style="width:130px;">
+        </div>
+        <div>
+          <label>日付</label>
+          <input type="date" id="bet-race-date">
+        </div>
+        <div>
+          <label>場所</label>
+          <input type="text" id="bet-race-place" placeholder="中山" style="width:80px;">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>馬券種別</label>
+          <select id="bet-bet-type">
+            {% for value, label in bet_type_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>組合せ</label>
+          <input type="text" id="bet-combination" placeholder="3-7" style="width:100px;">
+        </div>
+        <div>
+          <label>掛金(円)</label>
+          <input type="number" id="bet-bet-amount" value="100" style="width:90px;">
+        </div>
+        <div>
+          <label>オッズ</label>
+          <input type="number" id="bet-odds" step="0.1" placeholder="0.0" style="width:80px;">
+        </div>
+        <button onclick="submitBetting()">登録</button>
+      </div>
+      <div id="bet-result" class="sim-result"></div>
+    </div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Monthly chart
+    const chartData = {{ chart_data_json|safe }};
+    if (chartData.labels.length > 0) {
+      new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            { label: '掛金', data: chartData.bet_data, backgroundColor: 'rgba(59,130,246,0.6)' },
+            { label: '回収', data: chartData.payout_data, backgroundColor: 'rgba(74,222,128,0.6)' },
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: '#fff' } } },
+          scales: {
+            x: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          }
+        }
+      });
+    }
+
+    // Simulation submit
+    function submitSimulation() {
+      const isWinVal = document.getElementById('sim-is-win').value;
+      const body = {
+        race_id: document.getElementById('sim-race-id').value,
+        race_date: document.getElementById('sim-race-date').value,
+        race_place: document.getElementById('sim-race-place').value,
+        race_name: document.getElementById('sim-race-name').value,
+        bet_type: document.getElementById('sim-bet-type').value,
+        combination: document.getElementById('sim-combination').value,
+        bet_amount: document.getElementById('sim-bet-amount').value,
+        odds: document.getElementById('sim-odds').value,
+        is_win: isWinVal === '' ? null : isWinVal === 'true',
+        payout: document.getElementById('sim-payout').value,
+      };
+      fetch('/api/simulate/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      .then(r => r.json())
+      .then(data => {
+        const el = document.getElementById('sim-result');
+        el.className = 'sim-result show';
+        el.style.background = data.profit >= 0 ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)';
+        el.style.color = '#fff';
+        el.innerHTML = `${data.message} | 損益: <strong>${data.profit}</strong>円`;
+        loadSimulations();
+      })
+      .catch(err => {
+        const el = document.getElementById('sim-result');
+        el.className = 'sim-result show';
+        el.style.background = 'rgba(248,113,113,0.2)';
+        el.style.color = '#fff';
+        el.textContent = 'エラー: ' + err.message;
+      });
+    }
+
+    // Load sim records
+    function loadSimulations() {
+      fetch('/api/simulate/')
+      .then(r => r.json())
+      .then(data => {
+        const tbody = document.getElementById('sim-tbody');
+        tbody.innerHTML = '';
+        data.records.forEach(r => {
+          const cls = r.profit >= 0 ? 'win' : 'lose';
+          tbody.innerHTML += `<tr>
+            <td>${r.race_date}</td><td>${r.bet_type}</td><td>${r.combination}</td>
+            <td>${r.bet_amount}円</td><td>${r.payout}円</td>
+            <td class="${cls}">${r.profit}円</td>
+          </tr>`;
+        });
+        const s = data.stats;
+        document.getElementById('sim-stats').innerHTML = `
+          <div class="stat-card"><h4>SIM掛金</h4><div class="value">${s.total_bet}円</div></div>
+          <div class="stat-card"><h4>SIM回収率</h4><div class="value ${s.roi >= 100 ? 'positive' : 'negative'}">${s.roi}%</div></div>
+          <div class="stat-card"><h4>SIM損益</h4><div class="value ${s.total_profit >= 0 ? 'positive' : 'negative'}">${s.total_profit}円</div></div>
+        `;
+      });
+    }
+    loadSimulations();
+
+    // Betting submit
+    function submitBetting() {
+      const body = {
+        race_id: document.getElementById('bet-race-id').value,
+        race_date: document.getElementById('bet-race-date').value,
+        race_place: document.getElementById('bet-race-place').value,
+        bet_type: document.getElementById('bet-bet-type').value,
+        combination: document.getElementById('bet-combination').value,
+        bet_amount: document.getElementById('bet-bet-amount').value,
+        odds: document.getElementById('bet-odds').value,
+      };
+      fetch('/api/betting/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      .then(r => r.json())
+      .then(data => {
+        const el = document.getElementById('bet-result');
+        el.className = 'sim-result show';
+        el.style.background = 'rgba(74,222,128,0.2)';
+        el.style.color = '#fff';
+        el.textContent = data.message || '登録しました';
+      });
+    }
+  </script>
 {% endblock %}

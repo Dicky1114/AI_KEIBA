@@ -22,11 +22,18 @@ from app_folder.views.task_status import task_status, stop_task
 from app_folder.admin import admin_site
 from app_folder.views.main_view import main_view
 from app_folder.views.sales_view import sales_list, sales_upsert, sales_delete, sales_import
+from app_folder.views.dashboard_view import dashboard_view, simulate_view, betting_view
 
 # URLの全体設計
 urlpatterns = [
     # ルート → 統合ダッシュボード（認証不要）
     path('', main_view, name='main'),
+    # ダッシュボード（DB実データ + シミュレーション）
+    path('dashboard/', dashboard_view, name='dashboard'),
+    # 馬券 API
+    path('api/simulate/', simulate_view, name='simulate'),
+    path('api/betting/', betting_view, name='betting'),
+    path('api/betting/<int:record_id>/', betting_view, name='betting_detail'),
     # 管理画面（データ管理用）
     path('admin/', admin_site.urls),
     # Celery タスク状態確認・停止

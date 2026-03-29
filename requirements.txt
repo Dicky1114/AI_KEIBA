@@ -27,6 +27,10 @@ lightgbm==4.5.0
 joblib==1.4.2
 tqdm==4.67.1
 
+# ML Optimization
+optuna==4.1.0
+python-dateutil==2.9.0
+
 # Production Server
 gunicorn==23.0.0
 whitenoise==6.7.0

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import URLMst, BaseData, ResultData, HorseData, JockeyData, TrainingInfo
+from .models import URLMst, BaseData, ResultData, HorseData, JockeyData, TrainingInfo, BettingRecord
 
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
@@ -35,7 +35,8 @@ class CusAdminSite(AdminSite):
                 'ResultData',
                 'HorseData',
                 'JockeyData',
-                'TrainingInfo', 
+                'TrainingInfo',
+                'BettingRecord',
             ],
         }
 
@@ -276,3 +277,34 @@ admin_site.register(ResultData, ResultAdmin)
 admin_site.register(HorseData, HorseAdmin)
 admin_site.register(JockeyData, JockeyAdmin)
 admin_site.register(TrainingInfo, TrainingAdmin)
+
+
+class BettingRecordAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        'race_date', 'race_id', 'bet_type', 'combination',
+        'bet_amount', 'payout', 'profit', 'is_win', 'is_simulation',
+    )
+    search_fields = ('race_id', 'race_name', 'combination')
+    list_filter = ('bet_type', 'is_win', 'is_simulation', 'race_date')
+    list_editable = ('is_win', 'payout')
+
+    fieldsets = (
+        ("レース情報", {
+            'fields': ('race_id', 'race_date', 'race_place', 'race_name', 'race_number'),
+        }),
+        ("馬券情報", {
+            'fields': ('bet_type', 'combination', 'bet_amount', 'odds'),
+        }),
+        ("結果", {
+            'fields': ('is_win', 'payout', 'profit'),
+        }),
+        ("予測情報", {
+            'fields': ('predicted_rank_1', 'predicted_rank_2', 'predicted_rank_3', 'model_version'),
+            'classes': ('collapse',),
+        }),
+        ("その他", {
+            'fields': ('is_simulation', 'memo'),
+        }),
+    )
+
+admin_site.register(BettingRecord, BettingRecordAdmin)
