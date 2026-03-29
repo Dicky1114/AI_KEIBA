@@ -10,10 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from .base import * # base.pyを読み込む 
+from .base import * # base.pyを読み込む
 
 # base.pyにない分を補完
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '100.73.41.56']
+
+# ローカル開発用DB設定（keiba_db）
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'keiba_db',
+        'USER': 'keiba_user',
+        'PASSWORD': 'KeibaDB@2026',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
