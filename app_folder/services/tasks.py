@@ -197,7 +197,7 @@ def build_pending_race_pairs(start_date: date, end_date: date, username: str):
         {"race_id": race_id_list, "race_date": dates_list, "url": url_list}
     ).drop_duplicates(subset=["race_id", "race_date", "url"]).sort_values("race_date").reset_index(drop=True)
 
-    if insert_url_db(url_df, username=username) == "sys_err":
+    if insert_url_db(url_df, user_name=username) == "sys_err":
         raise RuntimeError("URL登録に失敗しました。")
 
     url_race_id_pairs = URLMst.objects.exclude(
@@ -214,9 +214,18 @@ def build_pending_race_pairs(start_date: date, end_date: date, username: str):
     return sorted(list(url_race_id_pairs) + list(race_id_url_pairs), key=lambda x: x[1])
 
 
+class _NoOpProgressRecorder:
+    """Redis不要のダミープログレスレコーダー。"""
+    def set_progress(self, current, total, description=""):
+        pass
+
+
 def run_base_scrape(task, username, url_race_id_pairs):
     redis_client = get_redis_client()
-    progress_recorder = ProgressRecorder(task)
+    try:
+        progress_recorder = ProgressRecorder(task)
+    except Exception:
+        progress_recorder = _NoOpProgressRecorder()
     zip_folder = settings.MEDIA_ROOT
     year = None
     task_id = getattr(getattr(task, "request", None), "id", None)
