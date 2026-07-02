@@ -1,0 +1,8 @@
+# ローカル起動確認用の上書き (git管理外)
+# ホスト5432が他プロジェクトのPostgresで占有されているため、dbのホスト公開ポートを退避。
+# webはコンテナ内ネットワーク(DB_HOST=db)で接続するため動作に影響なし。
+# ports配列はcomposeが追記マージするため !override で完全置換する。
+services:
+  db:
+    ports: !override
+      - "15434:5432"

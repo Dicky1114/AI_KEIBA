@@ -1,6 +1,19 @@
-from ..models import URLMst, BaseData, ResultData, HorseData, JockeyData
+import math
+import pandas as pd
+
+from ..models import URLMst, BaseData, ResultData, HorseData, JockeyData, HorseBloodMst
 from django.utils import timezone
 from django.db import connection
+
+
+def _nan_to_none(val):
+    """pandas NaN / numpy NaN を None に変換する (IntegerField挿入エラー対策)"""
+    try:
+        if pd.isna(val):
+            return None
+    except (TypeError, ValueError):
+        pass
+    return val
 
 def insert_url_db(url_df, user_name):
     """
@@ -58,24 +71,28 @@ def insert_base_db(basis_df, user_name):
                 is_different = any(
                     getattr(existing_record, field) != row[field]
                     for field in [
-                        'race_date', 'event_title', 'frame_number', 
-                        'horse_name', 'sex', 'weight', 'body_weight', 
-                        'jockey_name', 'stable_name', 'odds', 'race_place','count',
-                        'popularity', 'new_flg','distance','weather','track_condition',
+                        'race_date', 'event_title', 'frame_number',
+                        'horse_name', 'sex', 'age', 'weight', 'body_weight', 'body_weight_diff',
+                        'jockey_name', 'stable_name', 'odds', 'race_place', 'count',
+                        'popularity', 'new_flg', 'distance', 'distance_m', 'field_type',
+                        'weather', 'track_condition',
                         'win_1_flg', 'win_2_flg', 'win_3_flg',
-                        'not_win_flg', 'g3_flg', 'g2_flg', 'g1_flg', 'l_flg', 'op_flg', 'is_win5', 'horse_url', 'jockey_url'
+                        'not_win_flg', 'g3_flg', 'g2_flg', 'g1_flg', 'l_flg', 'op_flg', 'is_win5',
+                        'horse_url', 'jockey_url'
                     ]
                 )
 
                 if is_different:
                     # 差分があれば更新
                     for field in [
-                        'race_date', 'event_title', 'frame_number', 
-                        'horse_name', 'sex', 'weight', 'body_weight', 
-                        'jockey_name', 'stable_name', 'odds', 'race_place','count',
-                        'popularity', 'new_flg','distance','weather','track_condition',
+                        'race_date', 'event_title', 'frame_number',
+                        'horse_name', 'sex', 'age', 'weight', 'body_weight', 'body_weight_diff',
+                        'jockey_name', 'stable_name', 'odds', 'race_place', 'count',
+                        'popularity', 'new_flg', 'distance', 'distance_m', 'field_type',
+                        'weather', 'track_condition',
                         'win_1_flg', 'win_2_flg', 'win_3_flg',
-                        'not_win_flg', 'g3_flg', 'g2_flg', 'g1_flg', 'l_flg', 'op_flg' ,'is_win5', 'horse_url', 'jockey_url'
+                        'not_win_flg', 'g3_flg', 'g2_flg', 'g1_flg', 'l_flg', 'op_flg', 'is_win5',
+                        'horse_url', 'jockey_url'
                     ]:
                         setattr(existing_record, field, row[field])
                     
@@ -92,8 +109,10 @@ def insert_base_db(basis_df, user_name):
                     frame_number=row['frame_number'],
                     horse_name=row['horse_name'],
                     sex=row['sex'],
+                    age=_nan_to_none(row.get('age')),
                     weight=row['weight'],
                     body_weight=row['body_weight'],
+                    body_weight_diff=_nan_to_none(row.get('body_weight_diff')),
                     jockey_name=row['jockey_name'],
                     stable_name=row['stable_name'],
                     odds=row['odds'],
@@ -111,11 +130,13 @@ def insert_base_db(basis_df, user_name):
                     is_win5=row['is_win5'],
                     horse_url=row['horse_url'],
                     jockey_url=row['jockey_url'],
-                    distance = row['distance'],
-                    weather = row['weather'],
-                    track_condition = row['track_condition'],
-                    race_place = row['race_place'],
-                    count = row['count'],
+                    distance=row['distance'],
+                    distance_m=row.get('distance_m'),
+                    field_type=row.get('field_type'),
+                    weather=row['weather'],
+                    track_condition=row['track_condition'],
+                    race_place=row['race_place'],
+                    count=row['count'],
                     created_at=timezone.now(),
                     updated_at=timezone.now(),
                     created_user=user_name,
@@ -436,12 +457,16 @@ def insert_result_db(result_df, user_name):
             if is_different:
                 for field in [
                     'horse_name', 'rank', 'race_time', 'corner_order', 'race_date',
-                    'positions', 'positions_tie', 'pay1', 'pay1_tie', 'pay123_1', 'pay123_2', 
+                    'positions', 'positions_tie', 'pay1', 'pay1_tie', 'pay123_1', 'pay123_2',
                     'pay123_3', 'pay123_tie' ,'pay123_12_1' ,'pay123_12_2' ,'pay123_12_3' ,'pay123_12_4_tie',
                     'pay123_12_5_tie' ,'pay12_21' ,'pay12_21_tie' ,'pay12_12' ,'pay12_12_tie',
                     'pay123_321' ,'pay123_321_tie' ,'pay123_123' ,'pay123_123_tie'
                 ]:
                     setattr(existing_record, field, row[field])
+                # last_3f / margin は新カラムのため row に存在する場合のみ更新
+                for opt_field in ['last_3f', 'margin']:
+                    if opt_field in row:
+                        setattr(existing_record, opt_field, row[opt_field])
 
                 # 更新日時と更新者を設定
                 existing_record.updated_at = timezone.now()
@@ -478,6 +503,8 @@ def insert_result_db(result_df, user_name):
                 pay123_321_tie=row['pay123_321_tie'],
                 pay123_123=row['pay123_123'],
                 pay123_123_tie=row['pay123_123_tie'],
+                last_3f=row.get('last_3f', None),
+                margin=row.get('margin', None),
                 created_at=timezone.now(),
                 updated_at=timezone.now(),
                 created_user=user_name,

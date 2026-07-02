@@ -112,24 +112,26 @@ class GetRaceID():
             
             # ファイル内容の解析
             soup = BeautifulSoup(html_content, "html.parser")
-            race_links = soup.find_all("a", class_="LinkIconRaceMovie")
             date = soup.find("li", class_="Active").get("date")
             date_format = datetime.strptime(date, "%Y%m%d")
             race_cnt = soup.find_all("li", class_="RaceList_DataItem")
 
-            # データがない、または、すでに同じデータが登録されている場合、空データを戻り値として返す。
+            # データがない場合、空データを戻り値として返す。
+            # ※ 既登録チェックを廃止: insert_url_dbはupdate_or_createでstatusを保護するため不要
             if len(race_cnt) == 0:
                 return [], []
-            elif URLMst.objects.filter(race_date__date=date_format.strftime("%Y-%m-%d")).count() == len(race_cnt):
-                return [], []
-            
-            # アクセス情報からレース日とレースIDを取得する
-            for link in race_links:
-                match = re.search(r"race/movie.html\?race_id=(\d+)", link["href"])
+
+            # result.html リンクから race_id を取得（完了レースのみ）
+            # 動画リンク(LinkIconRaceMovie)は存在しないレースを含む場合があるため使用しない
+            seen = set(self.race_ids)
+            for a in soup.find_all("a", href=True):
+                match = re.search(r"result\.html\?race_id=(\d+)", a["href"])
                 if match:
-                    if match.group(1) not in self.race_ids:
-                        self.race_ids.append(match.group(1))
+                    race_id = match.group(1)
+                    if race_id not in seen:
+                        self.race_ids.append(race_id)
                         self.dates.append(date)
+                        seen.add(race_id)
 
             return self.race_ids, self.dates
 
@@ -145,7 +147,7 @@ class GetRaceID():
             return "sys_err", "sys_err"
 
     # 【関数_02】レース日程URLの作成（日単位）
-    def calendar_links(self, year, month, start_date_str, end_date_str):
+    def calendar_links(self, year, month, start_date_str, end_date_str, driver=None):
         """ 【関数_02】レース日程URLの作成（日単位）
             概要：
                 レース日単位のURLを取得
@@ -176,9 +178,15 @@ class GetRaceID():
             # ファイル読み込みされていない場合、URLにアクセス
             if html_content == "":
                 time.sleep(1)
-                req = request.Request(url, headers=settings.HEADERS)
-                response =  request.urlopen(req)
-                html_content = response.read().decode("EUC-JP", errors="ignore")
+                if driver is not None:
+                    # Chrome driver 経由（SOCKS5プロキシ対応）
+                    driver.get(url)
+                    time.sleep(2)
+                    html_content = driver.page_source
+                else:
+                    req = request.Request(url, headers=settings.HEADERS)
+                    response = request.urlopen(req, timeout=15)
+                    html_content = response.read().decode("EUC-JP", errors="ignore")
                 with open(save_file, "w", encoding="EUC-JP", errors="ignore") as file:
                     file.write(html_content)
 
@@ -249,8 +257,8 @@ class GetRaceID():
                     elif start_year != end_year and end_year == year and month > end_month:
                         continue
                     
-                    # レース日程URLの作成（日単位） 
-                    links = self.calendar_links(year, month, start_date, end_date)
+                    # レース日程URLの作成（日単位）— driver経由でSOCKS5プロキシ対応
+                    links = self.calendar_links(year, month, start_date, end_date, driver=driver)
 
                     # システムエラーが発生した場合、処理終了。
                     if links == "sys_err":

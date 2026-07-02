@@ -34,6 +34,7 @@ from app_folder.services.get_raceid import GetRaceID
 from app_folder.services.insert_db import insert_url_db
 from app_folder.models import URLMst, CompareView, CreateRaceIDsView
 from app_folder.services.tasks import create_base_task, create_horse_task, create_jockey_task
+from app_folder.utils.driver import Driver as SocksDriver
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -189,7 +190,7 @@ def main():
     logger.info(f"Dry-run: {args.dry_run}")
 
     ensure_media_dirs()
-    driver = create_driver()
+    driver = SocksDriver()  # SOCKS5プロキシ経由（IPブロック回避）
 
     total_races = 0
     try:

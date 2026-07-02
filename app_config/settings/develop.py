@@ -19,13 +19,18 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '100.73.41.56']
 
 # ローカル開発用DB設定（keiba_db）
+# WHY: docker-compose の db サービス(postgres/postgres/keiba_db@db:5432)と
+#      ホスト実行(localhost:15434)の両方に対応するため環境変数駆動にする。
+#      既定値は docker-compose の値に揃える。
+import os as _os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'keiba_db',
-        'USER': 'keiba_user',
-        'PASSWORD': 'KeibaDB@2026',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': _os.environ.get('DB_NAME', 'keiba_db'),
+        'USER': _os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': _os.environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': _os.environ.get('DB_HOST', 'db'),
+        'PORT': _os.environ.get('DB_PORT', '5432'),
     }
 }

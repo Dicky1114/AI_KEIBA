@@ -5,7 +5,6 @@ import pandas as pd
 import os
 from bs4 import BeautifulSoup
 from urllib import request
-import time
 from django.conf import settings
 from io import StringIO
 import glob
@@ -22,7 +21,7 @@ def find_file_with_race_id(race_id, result_path):
     files = glob.glob(pattern)
     return files[0] if files else None
 
-def result(url, race_id, action):
+def result(url, race_id, action, driver=None):
     # 変数定義
     result_df = pd.DataFrame()
     html_content = ''
@@ -38,14 +37,21 @@ def result(url, race_id, action):
     if file_path:
         with open(file_path, 'r', encoding='EUC-JP', errors='ignore') as f:
             html_content = f.read()
-            
-    # 参照ファイルが存在しない場合
+        # Chrome error pageキャッシュを検出して無効化
+        if '<title>race.netkeiba.com</title>' in html_content[:2000]:
+            html_content = ''
+            os.remove(file_path)
+
+    # 参照ファイルが存在しない場合 — urllib でフェッチ（EUC-JPのまま取得）
     if html_content == '':
-        time.sleep(1)  
+        time.sleep(1)
         header = change_user_agent(settings.USER_AGENTS)
         req = request.Request(url, headers=header)
-        response = request.urlopen(req)
-        html_content = response.read().decode('EUC-JP', errors='ignore')
+        try:
+            response = request.urlopen(req, timeout=15)
+            html_content = response.read().decode('EUC-JP', errors='ignore')
+        except Exception as e:
+            raise RuntimeError(f"result fetch failed ({url}): {e}")
         ref_flg = True
         with open(save_file, 'w', encoding='EUC-JP', errors='ignore') as f:
             f.write(html_content)
@@ -160,8 +166,16 @@ def result(url, race_id, action):
     else:
         result['pay123_321_tie'] = ''
 
-    # 払戻金-ワイド
-    value = df2.loc[0, 2]
+    # 払戻金-ワイド（枠連の有無でインデックスがずれるためラベル検索に変更）
+    wide_rows = df2.loc[df2[0] == 'ワイド', 2]
+    if wide_rows.empty:
+        result['pay123_12_1'] = ''
+        result['pay123_12_2'] = ''
+        result['pay123_12_3'] = ''
+        result['pay123_12_4_tie'] = ''
+        result['pay123_12_5_tie'] = ''
+        return pd.DataFrame([result]), kaisai_date, ref_flg
+    value = wide_rows.values[0]
     split = [item.replace('円', '').replace(',', '') for item in value.split(' ') if item]
     result['pay123_12_1'] = split[0]
     result['pay123_12_2'] = split[1]

@@ -7,7 +7,7 @@ from .base import *
 DEBUG = True
 
 # Allowed hosts for development
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '100.73.41.56']
 
 # Database configuration is inherited from base.py (PostgreSQL)
 

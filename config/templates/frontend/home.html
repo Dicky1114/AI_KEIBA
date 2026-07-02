@@ -43,8 +43,8 @@
                     <div class="stats-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="stats-number">89.2%</div>
-                    <div class="stats-label">AI予測的中率</div>
+                    <div class="stats-number" data-static="1">{{ stats.hit_rate }}</div>
+                    <div class="stats-label">予測本命の単勝的中率(実測)</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-4">
@@ -52,8 +52,8 @@
                     <div class="stats-icon">
                         <i class="fas fa-flag-checkered"></i>
                     </div>
-                    <div class="stats-number">12,450</div>
-                    <div class="stats-label">分析済みレース数</div>
+                    <div class="stats-number" data-static="1">{{ stats.races }}</div>
+                    <div class="stats-label">分析済みレース数(実データ)</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-4">
@@ -61,8 +61,8 @@
                     <div class="stats-icon">
                         <i class="fas fa-horse"></i>
                     </div>
-                    <div class="stats-number">8,976</div>
-                    <div class="stats-label">データベース馬数</div>
+                    <div class="stats-number" data-static="1">{{ stats.horses }}</div>
+                    <div class="stats-label">データベース馬数(実データ)</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 mb-4">
@@ -70,8 +70,8 @@
                     <div class="stats-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stats-number">2,341</div>
-                    <div class="stats-label">利用ユーザー数</div>
+                    <div class="stats-number" data-static="1">{{ stats.roi }}</div>
+                    <div class="stats-label">最善の買い方の回収率(実測)</div>
                 </div>
             </div>
         </div>
@@ -186,6 +186,7 @@
                         <h5 class="mb-0">
                             <i class="fas fa-star text-warning"></i>
                             第68回 有馬記念 (G1)
+                            <span class="badge bg-secondary ms-2" style="font-size:.6em;vertical-align:middle;">※サンプル表示</span>
                         </h5>
                     </div>
                     <div class="card-body">
@@ -244,6 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const animateStats = () => {
         stats.forEach(stat => {
+            // 実データ(data-static)はアニメ対象外。"%"や小数の二重表示バグを防ぐ
+            if (stat.dataset.static) return;
             const target = parseInt(stat.textContent.replace(/[^\d]/g, ''));
             const increment = target / 50;
             let current = 0;

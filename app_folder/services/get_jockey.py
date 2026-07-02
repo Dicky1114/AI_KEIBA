@@ -78,7 +78,9 @@ def jockey_data(html_content, username, flg):
                     new_date_str = new_date.strftime('%Y-%m-%d')
                     temp_jockey_df['日付'] = temp_jockey_df['日付'].str.replace("/", "-", regex=False)
 
-                    if page_value == 2 or new_date_str[:4] == '2018':
+                    # 5年前より古いデータは取得しない（ハードコードを動的計算に変更）
+                    cutoff_year = str(datetime.datetime.today().year - 5)
+                    if page_value == 2 or new_date_str[:4] <= cutoff_year:
                         break
                 
                     temp_jockey_df['レース名'] = temp_jockey_df['レース名'].fillna('')

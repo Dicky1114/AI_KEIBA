@@ -261,7 +261,7 @@ def run_base_scrape(task, username, url_race_id_pairs):
             with transaction.atomic():
                 try:
                     base_df, html_content, base_flg = get_data(url, race_id, driver)
-                    result_df, kaisai_date, result_flg = result(url, race_id, "")
+                    result_df, kaisai_date, result_flg = result(url, race_id, "", driver)
 
                     if html_content == "skip":
                         transaction.set_rollback(True)

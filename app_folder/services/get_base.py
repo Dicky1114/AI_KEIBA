@@ -6,6 +6,8 @@
 
 # ライブラリ
 import inspect
+import re
+import random
 import pandas as pd
 import os
 import time
@@ -75,9 +77,15 @@ def get_data(url, race_id, driver):
 
             # 参照ファイルが存在しなかった場合
             if html_content == '':
-                time.sleep(1)
+                time.sleep(random.uniform(0.5, 2.5))  # Bot対策: アクセス前スリープをランダム化
                 driver.get(url)
-                wait = WebDriverWait(driver, 10)
+                # not_found検出: netkeiba存在しないrace_idはエラーページを返す
+                # タイムアウト前に早期検出してsys_errループを防ぐ
+                time.sleep(random.uniform(1.5, 4.0))  # Bot対策: ページ読込後スリープもランダム化
+                page_src_check = driver.page_source
+                if any(kw in page_src_check for kw in ['ページが見つかりません', 'お探しのページは', 'Not Found', '404', 'エラーが発生']):
+                    return "not_found", "not_found", False
+                wait = WebDriverWait(driver, 30)
                 wait.until(EC.presence_of_element_located((By.XPATH, '//table[contains(@class, "RaceTable01")]')))
                 html_content = driver.page_source
                 ref_flg = True
@@ -104,7 +112,7 @@ def get_data(url, race_id, driver):
             # レース種別フラグ、開催日を取得
             horse_link_df, is_shinba, is_mishori, is_1win, is_2win, is_3win, is_g3, is_g2, is_g1, is_L, is_OP, is_win5, title_text = horse_data("self", html_content, "username", "base")
             jockey_link_df, distance, weather, track_condition, race_place, count = jockey_data(html_content, "username", "base")
-            empty_df, kaisai_date, dummy = result(url, race_id, "base") 
+            empty_df, kaisai_date, dummy = result(url, race_id, "base", driver)
 
             # 列名変更
             basis_df = basis_df[settings.BASE_COL]
@@ -114,7 +122,8 @@ def get_data(url, race_id, driver):
 
             # レース種別等の付与
             kaisai_date = datetime.datetime.strptime(kaisai_date, '%Y%m%d')
-            kaisai_date = pytz.timezone("Asia/Tokyo").localize(kaisai_date)
+            from zoneinfo import ZoneInfo
+            kaisai_date = kaisai_date.replace(tzinfo=ZoneInfo('Asia/Tokyo'))
             basis_df['race_id'] = race_id
             basis_df['race_date'] = kaisai_date
             basis_df['new_flg'] = is_shinba
@@ -134,6 +143,57 @@ def get_data(url, race_id, driver):
             basis_df['track_condition'] = str(track_condition)
             basis_df['race_place'] = str(race_place)
             basis_df['count'] = str(count)
+
+            # ─── 性齢 → 性別 + 年齢 ─────────────────────────────────────
+            # 例: "牡3" → sex="牡", age=3 / "牝4" → sex="牝", age=4
+            def _parse_sex(val):
+                m = re.match(r'([牡牝セ]+)', str(val))
+                return m.group(1) if m else str(val)
+
+            def _parse_age(val):
+                m = re.search(r'(\d+)', str(val))
+                return int(m.group(1)) if m else None
+
+            basis_df['age'] = basis_df['sex'].apply(_parse_age)
+            basis_df['sex'] = basis_df['sex'].apply(_parse_sex)
+
+            # ─── 馬体重 → 体重数値 + 増減 ───────────────────────────────
+            # 例: "480(-2)" → body_weight="480", body_weight_diff=-2
+            # 例: "計不" や空欄は None
+            def _parse_bw_diff(val):
+                m = re.search(r'\(([-+]?\d+)\)', str(val))
+                return int(m.group(1)) if m else None
+
+            def _parse_bw_num(val):
+                m = re.match(r'(\d+)', str(val))
+                return m.group(1) if m else val  # 数値部分のみ残す（CharField互換）
+
+            basis_df['body_weight_diff'] = basis_df['body_weight'].apply(_parse_bw_diff)
+            basis_df['body_weight'] = basis_df['body_weight'].apply(_parse_bw_num)
+
+            # ─── 距離 → メートル数 + コース種別 ────────────────────────
+            # 例: "芝1600m" → distance_m=1600, field_type="turf"
+            # 例: "ダ1200m" → distance_m=1200, field_type="dirt"
+            # 例: "障1500m" → distance_m=1500, field_type="jump"
+            _DISTANCE_STR = str(distance)
+
+            def _parse_field_type(val):
+                s = str(val)
+                if '芝' in s:
+                    return 'turf'
+                if 'ダ' in s or 'ダート' in s:
+                    return 'dirt'
+                if '障' in s:
+                    return 'jump'
+                return None
+
+            def _parse_distance_m(val):
+                m = re.search(r'(\d+)', str(val))
+                return int(m.group(1)) if m else None
+
+            basis_df['field_type'] = _parse_field_type(_DISTANCE_STR)
+            basis_df['distance_m'] = _parse_distance_m(_DISTANCE_STR)
+
             break
         except Exception as e:
             # アクセスできなかった回数をカウントアップ

@@ -36,8 +36,24 @@ class URLMst(models.Model):
     created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")  
     updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")  
 
-    created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")  
-    updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")  
+    created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")
+    updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")
+
+    STATUS_PENDING   = 'pending'
+    STATUS_OK        = 'ok'
+    STATUS_SYS_ERR   = 'sys_err'
+    STATUS_NOT_FOUND = 'not_found'
+    STATUS_CHOICES = [
+        (STATUS_PENDING,   'Pending'),
+        (STATUS_OK,        'OK'),
+        (STATUS_SYS_ERR,   'SysErr'),
+        (STATUS_NOT_FOUND, 'NotFound'),
+    ]
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING,
+        db_comment="スクレイピングステータス", help_text="pending/ok/sys_err/not_found"
+    )
+
     def __str__(self):
         return f"{self.race_id} - {self.url}"
 
@@ -77,15 +93,23 @@ class BaseData(models.Model):
     op_flg = models.BooleanField(default=False, db_comment="OPクラスフラグ", help_text="OPクラスフラグ")  
     is_win5 = models.BooleanField(default=False, db_comment="Win5対象フラグ", help_text="Win5対象フラグ")  
 
-    race_place = models.CharField(null=True, max_length=255, db_comment="開催場所", help_text="開催場所")   
+    race_place = models.CharField(null=True, max_length=255, db_comment="開催場所", help_text="開催場所")
     horse_url = models.CharField(null=True, db_comment="馬URL", help_text="馬URL")
     jockey_url = models.CharField(null=True, db_comment="騎手URL", help_text="騎手URL")
-    
-    distance = models.CharField(null=True, max_length=255, db_comment="距離", help_text="距離")   
+
+    # 性齢から分離した年齢（例: 「牡3」→ age=3）
+    age = models.SmallIntegerField(null=True, blank=True, db_comment="年齢", help_text="年齢")
+
+    distance = models.CharField(null=True, max_length=255, db_comment="距離(生データ)", help_text="距離(生データ 例:芝1600m)")
+    # 距離から分離したメートル数・コース種別
+    distance_m = models.SmallIntegerField(null=True, blank=True, db_comment="距離(m)", help_text="距離(m)")
+    field_type = models.CharField(null=True, blank=True, max_length=10, db_comment="コース種別", help_text="コース種別(turf/dirt/jump)")
     weather = models.CharField(null=True, db_comment="天気", help_text="天気")
     track_condition = models.CharField(null=True, db_comment="馬場", help_text="馬場")
     count = models.CharField(null=True, db_comment="頭数", help_text="頭数")
     race_place = models.CharField(null=True, db_comment="競技場", help_text="競技場")
+    # 馬体重から分離した増減値（例: 「480(-2)」→ body_weight_diff=-2）
+    body_weight_diff = models.SmallIntegerField(null=True, blank=True, db_comment="馬体重増減", help_text="馬体重増減(kg)")
     created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")  
     updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")  
 
@@ -133,13 +157,15 @@ class ResultData(models.Model):
     pay12_12_tie = models.CharField(max_length=30,  null=True, db_comment="同率馬単", help_text="同率馬単")  
     pay123_321 = models.CharField(max_length=30, default='', db_comment="3連複", help_text="3連複")  
     pay123_321_tie = models.CharField(max_length=30,  null=True, db_comment="同率3連複", help_text="同率3連複")  
-    pay123_123 = models.CharField(max_length=30, default='', db_comment="3連単", help_text="3連単")  
-    pay123_123_tie = models.CharField(max_length=30,  null=True, db_comment="同率3連単", help_text="同率3連単")  
+    pay123_123 = models.CharField(max_length=30, default='', db_comment="3連単", help_text="3連単")
+    pay123_123_tie = models.CharField(max_length=30,  null=True, db_comment="同率3連単", help_text="同率3連単")
+    last_3f = models.CharField(max_length=10, null=True, db_comment="上がり3ハロン", help_text="上がり3ハロン")
+    margin = models.CharField(max_length=20, null=True, db_comment="着差", help_text="着差")
 
-    created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")  
-    updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")  
-    created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")  
-    updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")  
+    created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")
+    updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")
+    created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")
+    updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")
 
     def __str__(self):
         return f"{self.race_id} - {self.horse_name} - {self.rank}"
@@ -1044,29 +1070,28 @@ class JockeyInfoView(models.Model):
         managed = False
         db_table = 'v_jockey_info'
 
-# region bk
-# class HorseBloodMst(models.Model):
-#     class Meta:
-#         db_table = 'm_horse_blood'
+class HorseBloodMst(models.Model):
+    class Meta:
+        db_table = 'm_horse_blood'
 
-#     id = models.AutoField(primary_key=True)
-#     horse_id = models.CharField(max_length=20, db_comment="馬ID", help_text="馬ID")
-#     horse_name = models.CharField(max_length=255, db_comment='馬名', help_text='馬名')
+    id = models.AutoField(primary_key=True)
+    horse_id = models.CharField(max_length=20, db_comment="馬ID", help_text="馬ID")
+    horse_name = models.CharField(max_length=255, db_comment='馬名', help_text='馬名')
 
-#     sire_1_male = models.CharField(max_length=255, null=True, db_comment='血統1世代目の雄', help_text='血統1世代目の雄')
-#     sire_1_female = models.CharField(max_length=255, null=True, db_comment='血統1世代目の雌', help_text='血統1世代目の雌')
-#     sire_2_1_male = models.CharField(max_length=255, null=True, db_comment='血統2-1世代目の雄', help_text='血統2-1世代目の雄')
-#     sire_2_1_female = models.CharField(max_length=255, null=True, db_comment='血統2-1世代目の雌', help_text='血統2-1世代目の雌')
-#     sire_2_2_male = models.CharField(max_length=255, null=True, db_comment='血統2-2世代目の雄', help_text='血統2-2世代目の雄')
-#     sire_2_2_female = models.CharField(max_length=255, null=True, db_comment='血統2-2世代目の雌', help_text='血統2-2世代目の雌')
+    sire_1_male = models.CharField(max_length=255, null=True, db_comment='父', help_text='父')
+    sire_1_female = models.CharField(max_length=255, null=True, db_comment='母', help_text='母')
+    sire_2_1_male = models.CharField(max_length=255, null=True, db_comment='父父', help_text='父父')
+    sire_2_1_female = models.CharField(max_length=255, null=True, db_comment='父母', help_text='父母')
+    sire_2_2_male = models.CharField(max_length=255, null=True, db_comment='母父', help_text='母父')
+    sire_2_2_female = models.CharField(max_length=255, null=True, db_comment='母母', help_text='母母')
 
-#     created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")  
-#     updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")  
-#     created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")  
-#     updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")  
+    created_at = models.DateTimeField(db_comment="作成日時", help_text="作成日時")
+    updated_at = models.DateTimeField(db_comment="更新日時", help_text="更新日時")
+    created_user = models.CharField(max_length=255, null=True, db_comment="作成ユーザーID", help_text="作成ユーザーID")
+    updated_user = models.CharField(max_length=255, null=True, db_comment="更新ユーザーID", help_text="更新ユーザーID")
 
-#     def __str__(self):
-#         return f'{self.horse_id} - {self.horse_name}'
+    def __str__(self):
+        return f'{self.horse_id} - {self.horse_name}'
 
 
 # ─── 売上・案件管理 ───────────────────────────────────────────────────────────
@@ -1092,7 +1117,7 @@ class SalesProject(models.Model):
     sales_amount   = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="売上")
     outsource_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="外注費")
     gross_profit   = models.DecimalField(max_digits=12, decimal_places=0, default=0, db_comment="粗利")
-    gross_profit_rate = models.DecimalField(max_digits=5, decimal_places=1, default=0, db_comment="粗利率(%)")
+    gross_profit_rate = models.DecimalField(max_digits=5, decimal_places=1, default=0, db_comment="粗利率(％)")
     status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='negotiating', db_comment="ステータス")
     memo           = models.TextField(blank=True, default='', db_comment="メモ")
     created_at     = models.DateTimeField(auto_now_add=True)

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('sales_amount', models.DecimalField(db_comment='売上', decimal_places=0, default=0, max_digits=12)),
                 ('outsource_amount', models.DecimalField(db_comment='外注費', decimal_places=0, default=0, max_digits=12)),
                 ('gross_profit', models.DecimalField(db_comment='粗利', decimal_places=0, default=0, max_digits=12)),
-                ('gross_profit_rate', models.DecimalField(db_comment='粗利率(%)', decimal_places=1, default=0, max_digits=5)),
+                ('gross_profit_rate', models.DecimalField(db_comment='粗利率(%%)', decimal_places=1, default=0, max_digits=5)),
                 ('status', models.CharField(
                     choices=[
                         ('negotiating', '商談中'),

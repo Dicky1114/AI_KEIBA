@@ -1,0 +1,59 @@
+# global_skill_manifest.yaml — 03_keiba (AI競馬予測)
+# 技術スタック: Django + PostgreSQL (Supabase) + Render.com
+# 生成日: 2026-06-13 (自動生成)
+schema_version: 1
+profile: api-server
+
+groups:
+  core:
+    enabled: true
+    skills:
+      00-g-config:  { version: "1.0.0", overlay: null }
+      01-g-session: { version: "1.0.0", overlay: null }
+      02-g-init:    { version: "1.0.0", overlay: null }
+      03-g-doc:     { version: "1.0.0", overlay: null }
+      04-g-task:    { version: "1.0.0", overlay: null }
+  design:
+    enabled: true
+    skills:
+      10-g-github: { version: "1.0.0", overlay: null }
+      11-g-plan:   { version: "1.0.0", overlay: null }
+  backend:
+    enabled: true
+    skills:
+      30-g-git: { version: "1.0.0", overlay: null }
+      31-g-api: { version: "1.0.0", overlay: null }
+  database:
+    enabled: true
+    skills:
+      40-g-db-query: { version: "1.0.0", overlay: null }
+  ai:
+    enabled: true
+    skills:
+      50-g-llm: { version: "1.0.0", overlay: null }
+  quality:
+    enabled: true
+    skills:
+      60-g-test:       { version: "1.0.0", overlay: null }
+      61-g-review:     { version: "1.0.0", overlay: null }
+      65-g-review-all: { version: "3.0.0", overlay: null }
+      66-g-cross-review:
+        version: 1.0.0
+        overlay: 66-cross-review
+
+  security:
+    enabled: true
+    skills:
+      70-g-security: { version: "1.1.0", overlay: null }
+  infra:
+    enabled: true
+    skills:
+      81-g-infra: { version: "1.0.0", overlay: null }
+  lifecycle:
+    enabled: true
+    skills:
+      90-g-clear:          { version: "1.0.0", overlay: null }
+      91-g-nightly-evolve: { version: "1.0.0", overlay: null }
+      92-g-compact:        { version: "1.0.0", overlay: null }
+
+custom_skills: []

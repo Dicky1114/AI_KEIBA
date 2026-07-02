@@ -21,9 +21,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t3m62y#=l@y&-rq21_q3q1dl#4ux2h4w5&-wcwwwkzermv5fve'
+# 環境変数から読み込む（本番では必ず設定が必要）
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    # 開発環境でのみ一時的なキーを生成（本番環境では RuntimeError）
+    if os.environ.get('DEBUG') == 'False' or os.environ.get('ENVIRONMENT') in ['staging', 'production']:
+        raise RuntimeError(
+            "環境変数 DJANGO_SECRET_KEY が設定されていません。本番・ステージング環境では必須です。\n"
+            "openssl rand -hex 32 で生成した値を設定してください。"
+        )
+    # 開発環境では一時生成（サーバ再起動で変更される）
+    SECRET_KEY = 'dev-insecure-' + os.urandom(32).hex()
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '100.73.41.56']
 DEBUG = True
 
 # インストールアプリケーション
